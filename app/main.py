@@ -9,9 +9,11 @@ def main():
 
     res = requests.post(server_url, data=player_key)
     if res.status_code != 200:
-        print('Unexpected server response: ', res.text)
+        print('Unexpected server response:')
+        print('HTTP code:', res.status_code)
+        print('Response body:', res.text)
         exit(2)
-    print('Server response: ', res.text)
+    print('Server response:', res.text)
 
 
 if __name__ == '__main__':
