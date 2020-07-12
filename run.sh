@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec python app/main.py "$@"
+python app/main.py "$@" || echo "run error code: $?"

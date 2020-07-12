@@ -1,6 +1,5 @@
-import sys
-
 import requests
+import sys
 
 
 def main():
@@ -8,8 +7,11 @@ def main():
     player_key = sys.argv[2]
     print('ServerUrl: %s; PlayerKey: %s' % (server_url, player_key))
 
-    res = requests.get('%s?playerKey=%s' % (server_url, player_key))
-    res.raise_for_status()
+    res = requests.post(server_url, data=player_key)
+    if res.status_code != 200:
+        print('Unexpected server response: ', res.text)
+        exit(2)
+    print('Server response: ', res.text)
 
 
 if __name__ == '__main__':
