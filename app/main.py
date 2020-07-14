@@ -1,7 +1,6 @@
 import requests
 import sys
 
-
 def main():
     server_url = sys.argv[1]
     player_key = sys.argv[2]
