@@ -15,6 +15,7 @@ class Node:
 
     def apply(self, v):
         self.argv.append(v)
+        return self
 
     def has_full_args(self):
         return len(self.argv) == self.argc
@@ -137,6 +138,24 @@ class Ap(Node):
         return self.argv[0].apply(self.argv[1])
 
 
+class SCombinator(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # ap x y z  =>  x(z)(y(z))
+        if not isinstance(self.argv[2], int):
+            self.argv[2] = self.argv[2]()
+        yz = self.argv[1].apply(self.argv[2])()
+        xz = self.argv[0].apply(self.argv[2])
+        return xz.apply(yz)()
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -193,6 +212,8 @@ def parse(tokens):
             nodes.append(Neg())
         elif t == 'ap':
             nodes.append(Ap())
+        elif t == 's':
+            nodes.append(SCombinator())
         else:
             # number
             nodes.append(int(t))

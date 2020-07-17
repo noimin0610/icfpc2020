@@ -116,6 +116,14 @@ class TestNeg(unittest.TestCase):
         self.assertEqual(neg(), -2)
 
 
+class TestSCombinator(unittest.TestCase):
+    def test_simple(self):
+        s = SCombinator([Add(), Inc(), 1])
+        self.assertEqual(s(), 3, str(s))
+        s = SCombinator([Mul(), Add([1]), 6])
+        self.assertEqual(s(), 42, str(s))
+
+
 class TestEval(unittest.TestCase):
     def test_only_number(self):
         program = Program([2])
@@ -136,6 +144,12 @@ class TestEval(unittest.TestCase):
                            Mul(), Ap(), Inc(), 4, Ap(), Dec(), 0])
         self.assertEqual(program.eval(), True, str(program))
 
+    def test_s_combinator(self):
+        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), 1])
+        self.assertEqual(program.eval(), 3, str(program))
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
+        self.assertEqual(program.eval(), 42, str(program))
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):
