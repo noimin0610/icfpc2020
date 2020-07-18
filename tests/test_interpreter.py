@@ -110,6 +110,58 @@ class TestLt(unittest.TestCase):
         self.assertEqual(lt(), True, str(lt))
 
 
+class TestModulate(unittest.TestCase):
+    def test_simple(self):
+        mod = Modulate([0])
+        self.assertEqual(mod(), '010', str(mod))
+        mod = Modulate([1])
+        self.assertEqual(mod(), '01100001', str(mod))
+        mod = Modulate([-1])
+        self.assertEqual(mod(), '10100001', str(mod))
+        mod = Modulate([2])
+        self.assertEqual(mod(), '01100010', str(mod))
+        mod = Modulate([-2])
+        self.assertEqual(mod(), '10100010', str(mod))
+        mod = Modulate([16])
+        self.assertEqual(mod(), '0111000010000', str(mod))
+        mod = Modulate([-16])
+        self.assertEqual(mod(), '1011000010000', str(mod))
+        mod = Modulate([255])
+        self.assertEqual(mod(), '0111011111111', str(mod))
+        mod = Modulate([-255])
+        self.assertEqual(mod(), '1011011111111', str(mod))
+        mod = Modulate([256])
+        self.assertEqual(mod(), '011110000100000000', str(mod))
+        mod = Modulate([-256])
+        self.assertEqual(mod(), '101110000100000000', str(mod))
+
+
+class TestDemodulate(unittest.TestCase):
+    def test_simple(self):
+        dem = Demodulate(['010'])
+        self.assertEqual(dem(), 0, str(dem))
+        dem = Demodulate(['01100001'])
+        self.assertEqual(dem(), 1, str(dem))
+        dem = Demodulate(['10100001'])
+        self.assertEqual(dem(), -1, str(dem))
+        dem = Demodulate(['01100010'])
+        self.assertEqual(dem(), 2, str(dem))
+        dem = Demodulate(['10100010'])
+        self.assertEqual(dem(), -2, str(dem))
+        dem = Demodulate(['0111000010000'])
+        self.assertEqual(dem(), 16, str(dem))
+        dem = Demodulate(['1011000010000'])
+        self.assertEqual(dem(), -16, str(dem))
+        dem = Demodulate(['0111011111111'])
+        self.assertEqual(dem(), 255, str(dem))
+        dem = Demodulate(['1011011111111'])
+        self.assertEqual(dem(), -255, str(dem))
+        dem = Demodulate(['011110000100000000'])
+        self.assertEqual(dem(), 256, str(dem))
+        dem = Demodulate(['101110000100000000'])
+        self.assertEqual(dem(), -256, str(dem))
+
+
 class TestNeg(unittest.TestCase):
     def test_simple(self):
         neg = Neg([0])
@@ -256,6 +308,12 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
         self.assertEqual(program.eval(), 42, str(program))
+
+    def test_modulate_demodulate(self):
+        program = Program([Ap(), Demodulate(), Ap(), Modulate(), 999])
+        self.assertEqual(program.eval(), 999, str(program))
+        #program = Program([Ap(), Modulate(), Ap(), Demodulate(), '01100101']) #TODO stringを扱いたい
+        #self.assertEqual(program.eval(), '01100101', str(program))
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):
