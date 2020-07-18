@@ -17,7 +17,7 @@ def main():
 
     aliens_api = server_url + '/aliens/'
     for i in range(1, 10):
-        res = requests.post(server_url + str(i), data=player_key)
+        res = requests.post(aliens_api + str(i), data=player_key)
         if res.status_code == 302:
             print('HTTP code:', res.status_code)
         elif res.status_code != 200:
