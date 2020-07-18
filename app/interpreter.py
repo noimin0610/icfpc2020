@@ -256,6 +256,18 @@ class ICombinator(Node):
         return self.argv[0]
 
 
+class Pwr2(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return pow(2, self.argv[0])
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -324,6 +336,8 @@ def parse(tokens):
             nodes.append(FalseCombinator())
         elif t == 'i':
             nodes.append(ICombinator())
+        elif t == 'pwr2':
+            nodes.append(Pwr2())
         else:
             # number
             nodes.append(int(t))

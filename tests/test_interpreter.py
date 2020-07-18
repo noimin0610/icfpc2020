@@ -168,6 +168,16 @@ class TestICombinator(unittest.TestCase):
         self.assertEqual(i(), Add(), str(i))
 
 
+class TestPwr2(unittest.TestCase):
+    def test_simple(self):
+        p = Pwr2([1])
+        self.assertEqual(p(), 2, str(p))
+        p = Pwr2([0])
+        self.assertEqual(p(), 1, str(p))
+        p = Pwr2([8])
+        self.assertEqual(p(), 256, str(p))
+
+
 class TestEval(unittest.TestCase):
     def test_only_number(self):
         program = Program([2])
