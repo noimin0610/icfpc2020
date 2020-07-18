@@ -225,7 +225,7 @@ class SCombinator(Node):
         # ap x y z  =>  x(z)(y(z))
         if len(self.argv) < self.argc:
             return self
-        if not isinstance(self.argv[2], int):
+        if not isinstance(self.argv[2], int) or not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
         yz = self.argv[1].apply(self.argv[2])()
         xz = self.argv[0].apply(self.argv[2])
@@ -245,7 +245,7 @@ class CCombinator(Node):
         # ap x y z  =>  x(z)(y)
         if len(self.argv) < self.argc:
             return self
-        if not isinstance(self.argv[2], int):
+        if not isinstance(self.argv[2], int) or not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
         self.argv[0].apply(self.argv[2]).apply(self.argv[1])
         return self.argv[0]()
@@ -313,7 +313,7 @@ class FalseCombinator(Node):
         if len(self.argv) < self.argc:
             return self
         # 引数があればCombinator
-        if not isinstance(self.argv[1], int):
+        if not isinstance(self.argv[1], int) or not isinstance(self.argv[1], list):
             self.argv[1] = self.argv[1]()
         return self.argv[1]
 
