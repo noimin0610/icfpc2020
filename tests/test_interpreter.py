@@ -130,7 +130,7 @@ class TestEval(unittest.TestCase):
         self.assertEqual(program.eval(), 2, str(program))
 
     def test_single_ap(self):
-        program = Program([Ap(), Add(), -2, 12])
+        program = Program([Ap(), Ap(), Add(), -2, 12])
         self.assertEqual(program.eval(), 10, str(program))
 
     def test_multi_ap(self):
