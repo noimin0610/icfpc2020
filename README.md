@@ -14,3 +14,10 @@ docker run [container-name] [args for main.py]
 - build 時間は 10 分以内になるようにする
 - プログラムはHTTPを介してオーガナイザーのサーバーと通信する必要があるが，インターネットにアクセスすることはできない
 - Dockerfile の変更は不可
+
+## Resources
+
+|name|description|
+|--|--|
+|app/check_result_error.txt|計算に成功した行の計算結果と与式|
+|app/check_result_success.txt|計算に失敗した行のエラー内容と与式|
