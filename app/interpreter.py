@@ -415,6 +415,8 @@ class Cons(Node):
             if isinstance(self.argv[0], Nil):
                 return Nil()
             return self.argv[:-1]
+        if isinstance(self.argv[1], int) or isinstance(self.argv[1], Variable):
+           self.argv[1] = [self.argv[1]]
         return [self.argv[0]] + self.argv[1]
 
     def _add__(self, other):
@@ -446,6 +448,8 @@ class Car(Node):
         # TODO: impl for `ap car x2   =   ap x2 t`
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            self.argv[0] = [self.argv[0]]
         assert isinstance(self.argv[0], list)
         return self.argv[0][0]
 
@@ -465,6 +469,8 @@ class Cdr(Node):
         # TODO: impl for `ap car x2   =   ap x2 f`
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            self.argv[0] = [self.argv[0]]
         assert isinstance(self.argv[0], list)
         return self.argv[0][-1]
 
