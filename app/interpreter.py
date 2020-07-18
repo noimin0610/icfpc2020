@@ -133,13 +133,13 @@ class Modulate(Node):
     def __call__(self):
         v = self.argv[0]
         if v == 0:
-            return '010'
-        ret = '01' if v > 0 else '10'
+            return [0,1,0]
+        ret = [0,1] if v > 0 else [1,0]
         binary = bin(v)[2+(v < 0):]
         l = len(binary)
         bitlen = 0--l//4*4
-        ret += '1'*(bitlen//4) + '0'
-        ret += '0'*(bitlen - l) + binary
+        ret += [1]*(bitlen//4) + [0]
+        ret += [0]*(bitlen - l) + [int(c) for c in binary]
         return ret
 
 
@@ -152,14 +152,18 @@ class Demodulate(Node):
             self.argv = []
 
     def __call__(self):
-        s = self.argv[0]  # must be 01-string
-        if s == '010':
+        a = self.argv[0]
+        if a == [0,1,0]:
             return 0
-        neg = s.startswith('10')
+        neg = a[:2] == [1,0]
         i = 2
-        while s[i] == '1':
+        while a[i] == 1:
             i += 1
-        v = int(s[i+1:], 2)
+        v = 0
+        k = 1
+        for b in reversed(a[i+1:]):
+            v += k*b
+            k *= 2
         if neg:
             v *= -1
         return v
