@@ -44,6 +44,8 @@ class Inc(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         return self.argv[0] + 1
 
 
@@ -58,6 +60,8 @@ class Dec(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         return self.argv[0] - 1
 
 
@@ -72,6 +76,8 @@ class Add(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
+            return Variable()
         return self.argv[0] + self.argv[1]
 
 
@@ -86,6 +92,8 @@ class Mul(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
+            return Variable()
         return self.argv[0]*self.argv[1]
 
 
@@ -102,6 +110,8 @@ class Div(Node):
         """
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
+            return Variable()
         if self.argv[0]*self.argv[1] < 0:
             return abs(self.argv[0])//abs(self.argv[1]) * -1
         else:
@@ -119,6 +129,8 @@ class Eq(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
+            return Variable()
         return self.argv[0] == self.argv[1]
 
 
@@ -133,6 +145,8 @@ class Lt(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
+            return Variable()
         return self.argv[0] < self.argv[1]
 
 
@@ -217,6 +231,8 @@ class Neg(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         return -self.argv[0]
 
 
@@ -232,6 +248,8 @@ class Ap(Node):
         # ap f x  =>  f(x)
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         return self.argv[0].apply(self.argv[1])
 
 
@@ -248,6 +266,8 @@ class SCombinator(Node):
         # ap x y z  =>  x(z)(y(z))
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable) or isinstance(self.argv[2], Variable):
+            return Variable()
         if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
         yz = self.argv[1].apply(self.argv[2])()
@@ -268,6 +288,8 @@ class CCombinator(Node):
         # ap x y z  =>  x(z)(y)
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable) or isinstance(self.argv[2], Variable):
+            return Variable()
         if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
         self.argv[0].apply(self.argv[2]).apply(self.argv[1])
@@ -287,6 +309,8 @@ class BCombinator(Node):
         # ap x y z  =>  x(y(z))
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
 
@@ -371,6 +395,8 @@ class Pwr2(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         return pow(2, self.argv[0])
 
 
@@ -469,12 +495,15 @@ class IsNil(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
         return TrueCombinator() if isinstance(self.argv[0], Nil) else FalseCombinator()
 
 
 class Variable(Node):
     def __init__(self, argv=None):
         self.argc = 0
+        self.argv = []
 
     def __call__(self):
         return self
