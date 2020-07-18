@@ -113,52 +113,60 @@ class TestLt(unittest.TestCase):
 class TestModulate(unittest.TestCase):
     def test_simple(self):
         mod = Modulate([0])
-        self.assertEqual(mod(), [0,1,0], str(mod))
+        self.assertEqual(mod(), [0, 1, 0], str(mod))
         mod = Modulate([1])
-        self.assertEqual(mod(), [0,1,1,0,0,0,0,1], str(mod))
+        self.assertEqual(mod(), [0, 1, 1, 0, 0, 0, 0, 1], str(mod))
         mod = Modulate([-1])
-        self.assertEqual(mod(), [1,0,1,0,0,0,0,1], str(mod))
+        self.assertEqual(mod(), [1, 0, 1, 0, 0, 0, 0, 1], str(mod))
         mod = Modulate([2])
-        self.assertEqual(mod(), [0,1,1,0,0,0,1,0], str(mod))
+        self.assertEqual(mod(), [0, 1, 1, 0, 0, 0, 1, 0], str(mod))
         mod = Modulate([-2])
-        self.assertEqual(mod(), [1,0,1,0,0,0,1,0], str(mod))
+        self.assertEqual(mod(), [1, 0, 1, 0, 0, 0, 1, 0], str(mod))
         mod = Modulate([16])
-        self.assertEqual(mod(), [0,1,1,1,0,0,0,0,1,0,0,0,0], str(mod))
+        self.assertEqual(mod(), [0, 1, 1, 1, 0, 0, 0,
+                                 0, 1, 0, 0, 0, 0], str(mod))
         mod = Modulate([-16])
-        self.assertEqual(mod(), [1,0,1,1,0,0,0,0,1,0,0,0,0], str(mod))
+        self.assertEqual(mod(), [1, 0, 1, 1, 0, 0, 0,
+                                 0, 1, 0, 0, 0, 0], str(mod))
         mod = Modulate([255])
-        self.assertEqual(mod(), [0,1,1,1,0,1,1,1,1,1,1,1,1], str(mod))
+        self.assertEqual(mod(), [0, 1, 1, 1, 0, 1, 1,
+                                 1, 1, 1, 1, 1, 1], str(mod))
         mod = Modulate([-255])
-        self.assertEqual(mod(), [1,0,1,1,0,1,1,1,1,1,1,1,1], str(mod))
+        self.assertEqual(mod(), [1, 0, 1, 1, 0, 1, 1,
+                                 1, 1, 1, 1, 1, 1], str(mod))
         mod = Modulate([256])
-        self.assertEqual(mod(), [0,1,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0], str(mod))
+        self.assertEqual(mod(), [0, 1, 1, 1, 1, 0, 0,
+                                 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], str(mod))
         mod = Modulate([-256])
-        self.assertEqual(mod(), [1,0,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0], str(mod))
+        self.assertEqual(mod(), [1, 0, 1, 1, 1, 0, 0,
+                                 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], str(mod))
 
 
 class TestDemodulate(unittest.TestCase):
     def test_simple(self):
-        dem = Demodulate([[0,1,0]])
+        dem = Demodulate([[0, 1, 0]])
         self.assertEqual(dem(), 0, str(dem))
-        dem = Demodulate([[0,1,1,0,0,0,0,1]])
+        dem = Demodulate([[0, 1, 1, 0, 0, 0, 0, 1]])
         self.assertEqual(dem(), 1, str(dem))
-        dem = Demodulate([[1,0,1,0,0,0,0,1]])
+        dem = Demodulate([[1, 0, 1, 0, 0, 0, 0, 1]])
         self.assertEqual(dem(), -1, str(dem))
-        dem = Demodulate([[0,1,1,0,0,0,1,0]])
+        dem = Demodulate([[0, 1, 1, 0, 0, 0, 1, 0]])
         self.assertEqual(dem(), 2, str(dem))
-        dem = Demodulate([[1,0,1,0,0,0,1,0]])
+        dem = Demodulate([[1, 0, 1, 0, 0, 0, 1, 0]])
         self.assertEqual(dem(), -2, str(dem))
-        dem = Demodulate([[0,1,1,1,0,0,0,0,1,0,0,0,0]])
+        dem = Demodulate([[0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]])
         self.assertEqual(dem(), 16, str(dem))
-        dem = Demodulate([[1,0,1,1,0,0,0,0,1,0,0,0,0]])
+        dem = Demodulate([[1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]])
         self.assertEqual(dem(), -16, str(dem))
-        dem = Demodulate([[0,1,1,1,0,1,1,1,1,1,1,1,1]])
+        dem = Demodulate([[0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1]])
         self.assertEqual(dem(), 255, str(dem))
-        dem = Demodulate([[1,0,1,1,0,1,1,1,1,1,1,1,1]])
+        dem = Demodulate([[1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1]])
         self.assertEqual(dem(), -255, str(dem))
-        dem = Demodulate([[0,1,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0]])
+        dem = Demodulate(
+            [[0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]])
         self.assertEqual(dem(), 256, str(dem))
-        dem = Demodulate([[1,0,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0]])
+        dem = Demodulate(
+            [[1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]])
         self.assertEqual(dem(), -256, str(dem))
 
 
@@ -203,11 +211,19 @@ class TestTrueCombinator(unittest.TestCase):
         k = TrueCombinator([TrueCombinator(), 1])
         self.assertEqual(k(), TrueCombinator(), str(k))
 
+    def test_ignore_second_arg(self):
+        k = TrueCombinator([1, Ap()])
+        self.assertEqual(k(), 1, str(k))
+
 
 class TestFalseCombinator(unittest.TestCase):
     def test_simple(self):
         k = FalseCombinator([1, 5])
         self.assertEqual(k(), 5, str(k))
+
+    def test_ignore_first_arg(self):
+        k = FalseCombinator([Inc(), 2])
+        self.assertEqual(k(), 2, str(k))
 
 
 class TestICombinator(unittest.TestCase):
@@ -313,8 +329,28 @@ class TestEval(unittest.TestCase):
     def test_modulate_demodulate(self):
         program = Program([Ap(), Demodulate(), Ap(), Modulate(), 999])
         self.assertEqual(program.eval(), 999, str(program))
-        program = Program([Ap(), Modulate(), Ap(), Demodulate(), [0,1,1,0,0,1,0,1]])
-        self.assertEqual(program.eval(), [0,1,1,0,0,1,0,1], str(program))
+        program = Program(
+            [Ap(), Modulate(), Ap(), Demodulate(), [0, 1, 1, 0, 0, 1, 0, 1]])
+        self.assertEqual(program.eval(), [
+                         0, 1, 1, 0, 0, 1, 0, 1], str(program))
+
+    def test_true_combinator(self):
+        program = Program(
+            [Ap(), Ap(), TrueCombinator(), [1], Ap(), Inc(), 1])
+        self.assertEqual(program.eval(), [1], str(program))
+
+        program = Program(
+            [Ap(),  TrueCombinator(), Add()])
+        self.assertEqual(program.eval(), Add(), str(program))
+
+    def test_false_combinator(self):
+        program = Program(
+            [Ap(), Ap(), FalseCombinator(), [1], Ap(), Inc(), 1])
+        self.assertEqual(program.eval(), 2, str(program))
+
+        program = Program(
+            [Ap(), Ap(), FalseCombinator(), Add(), Ap(), Inc(), 1])
+        self.assertEqual(program.eval(), 2, str(program))
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):

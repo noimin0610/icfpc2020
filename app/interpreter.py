@@ -42,6 +42,8 @@ class Inc(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0] + 1
 
 
@@ -54,6 +56,8 @@ class Dec(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0] - 1
 
 
@@ -66,6 +70,8 @@ class Add(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0] + self.argv[1]
 
 
@@ -78,6 +84,8 @@ class Mul(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0]*self.argv[1]
 
 
@@ -92,6 +100,8 @@ class Div(Node):
     def __call__(self):
         """整数除算
         """
+        if len(self.argv) < self.argc:
+            return self
         if self.argv[0]*self.argv[1] < 0:
             return abs(self.argv[0])//abs(self.argv[1]) * -1
         else:
@@ -107,6 +117,8 @@ class Eq(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0] == self.argv[1]
 
 
@@ -119,6 +131,8 @@ class Lt(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0] < self.argv[1]
 
 
@@ -133,8 +147,8 @@ class Modulate(Node):
     def __call__(self):
         v = self.argv[0]
         if v == 0:
-            return [0,1,0]
-        ret = [0,1] if v > 0 else [1,0]
+            return [0, 1, 0]
+        ret = [0, 1] if v > 0 else [1, 0]
         binary = bin(v)[2+(v < 0):]
         l = len(binary)
         bitlen = 0--l//4*4
@@ -153,9 +167,9 @@ class Demodulate(Node):
 
     def __call__(self):
         a = self.argv[0]
-        if a == [0,1,0]:
+        if a == [0, 1, 0]:
             return 0
-        neg = a[:2] == [1,0]
+        neg = a[:2] == [1, 0]
         i = 2
         while a[i] == 1:
             i += 1
@@ -178,6 +192,8 @@ class Neg(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return -self.argv[0]
 
 
@@ -191,6 +207,8 @@ class Ap(Node):
 
     def __call__(self):
         # ap f x  =>  f(x)
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0].apply(self.argv[1])
 
 
@@ -271,7 +289,7 @@ class TrueCombinator(Node):
         if len(self.argv) == 0:
             return TrueCombinator()
         # 引数があればK Combinator
-        if not isinstance(self.argv[0], int):
+        if not isinstance(self.argv[0], int) and not isinstance(self.argv[0], list):
             self.argv[0] = self.argv[0]()
         return self.argv[0]
 
@@ -292,6 +310,8 @@ class FalseCombinator(Node):
         # 引数がない場合はFalse
         if len(self.argv) == 0:
             return FalseCombinator()
+        if len(self.argv) < self.argc:
+            return self
         # 引数があればCombinator
         if not isinstance(self.argv[1], int):
             self.argv[1] = self.argv[1]()
@@ -312,6 +332,8 @@ class ICombinator(Node):
 
     def __call__(self):
         # i(x) = x
+        if len(self.argv) < self.argc:
+            return self
         return self.argv[0]
 
 
@@ -324,6 +346,8 @@ class Pwr2(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return pow(2, self.argv[0])
 
 
@@ -371,6 +395,8 @@ class Car(Node):
 
     def __call__(self):
         # TODO: impl for `ap car x2   =   ap x2 t`
+        if len(self.argv) < self.argc:
+            return self
         assert isinstance(self.argv[0], list)
         return self.argv[0][0]
 
@@ -388,6 +414,8 @@ class Cdr(Node):
 
     def __call__(self):
         # TODO: impl for `ap car x2   =   ap x2 f`
+        if len(self.argv) < self.argc:
+            return self
         assert isinstance(self.argv[0], list)
         return self.argv[0][-1]
 
@@ -416,6 +444,8 @@ class IsNil(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
         return TrueCombinator() if isinstance(self.argv[0], Nil) else FalseCombinator()
 
 
