@@ -244,6 +244,16 @@ class Demodulate(Node):
             v *= -1
         return v
 
+class Modem(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return Demodulate(Modulate(self.argv[0]))
 
 # class Modem(Node):
 #     def __init__(self, argv=None):
@@ -596,8 +606,42 @@ class Vec(Node):
             self.argv = []
 
     def __call__(self):
-        return Cons(self.argv)
+        return Cons(self.argv)()
 
+class Draw(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return self.argv #TODO pictureの持ち方をどうするか？要検討
+
+class ParenOpen(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+class ParenClose(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+class Comma(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
 
 class If0(Node):
     def __init__(self, argv=None):
@@ -671,8 +715,22 @@ class Program:
             self.i += 1
         op = self.nodes[self.i]
         self.i += 1
-        for _ in range(args_num):
-            op.apply(self._recursive_eval())
+        if isinstance(op, Draw): # ap draw ( ... ) に対応
+            assert isinstance(self.nodes[self.i], ParenOpen)
+            self.i += 1
+            draw_args = []
+            if isinstance(self.nodes[self.i], ParenClose):
+                self.i += 1
+            else:
+                while 1:
+                    draw_args.append(self._recursive_eval())
+                    self.i += 1
+                    if isinstance(self.nodes[self.i-1], ParenClose):
+                        break
+            op.apply(draw_args)
+        else:
+            for _ in range(args_num):
+                op.apply(self._recursive_eval())
         return op() if op.has_full_args() else op
 
 
@@ -725,6 +783,16 @@ def parse(tokens):
             nodes.append(Modulate())
         elif t == 'dem':
             nodes.append(Demodulate())
+        elif t == 'vec':
+            nodes.append(Vec())
+        elif t == 'draw':
+            nodes.append(Draw())
+        elif t == '(':
+            nodes.append(ParenOpen())
+        elif t == ')':
+            nodes.append(ParenClose())
+        elif t == ',':
+            nodes.append(Comma())
         elif t.startswith(':'):
             nodes.append(Variable())
         elif t == 'send':
