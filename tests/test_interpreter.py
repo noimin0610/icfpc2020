@@ -328,6 +328,33 @@ class TestIsNil(unittest.TestCase):
         self.assertEqual(isnil(), FalseCombinator())
 
 
+class TestVariable(unittest.TestCase):
+    def test_simple(self):
+        variable = Variable()
+        self.assertEqual(variable(), Variable())
+        inc = Inc([Variable()])
+        self.assertEqual(inc(), Variable())
+        dec = Dec([Variable()])
+        self.assertEqual(dec(), Variable())
+        add = Add([Variable(), 2])
+        self.assertEqual(add(), Variable())
+        mul = Mul([Variable(), 2])
+        self.assertEqual(mul(), Variable())
+        div = Div([Variable(), 2])
+        self.assertEqual(div(), Variable())
+        eq = Eq([Variable(), 2])
+        self.assertEqual(eq(), Variable())
+        lt = Lt([Variable(), 2])
+        self.assertEqual(lt(), Variable())
+        # Modulate, Demodulate は考慮しない
+        neg = Neg([Variable()])
+        self.assertEqual(neg(), Variable())
+        pwr2 = Pwr2([Variable()])
+        self.assertEqual(pwr2(), Variable())
+        isnil = IsNil([Variable()])
+        self.assertEqual(isnil(), Variable())
+
+
 class TestVec(unittest.TestCase):
     def test_simple(self):
         vec = Vec()
@@ -348,6 +375,8 @@ class TestEval(unittest.TestCase):
     def test_single_ap(self):
         program = Program([Ap(), Ap(), Add(), -2, 12])
         self.assertEqual(program.eval(), 10, str(program))
+        program = Program([Ap(), Ap(), Add(), -2, Variable()])
+        self.assertEqual(program.eval(), Variable(), program)
 
     def test_multi_ap(self):
         program = Program([Ap(), Ap(), Add(), -2, Ap(), Neg(), 5])
@@ -359,6 +388,9 @@ class TestEval(unittest.TestCase):
         program = Program([Ap(), Ap(), Eq(), -5, Ap(), Ap(),
                            Mul(), Ap(), Inc(), 4, Ap(), Dec(), 0])
         self.assertEqual(program.eval(), True, str(program))
+        
+        program = Program([Ap(), Ap(), Add(), -2, Ap(), Neg(), Variable()])
+        self.assertEqual(program.eval(), Variable(), program)
 
     def test_s_combinator(self):
         program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), 1])
@@ -366,6 +398,12 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
         self.assertEqual(program.eval(), 42, str(program))
+        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable()])
+        self.assertEqual(program.eval(), Variable(), program)
+        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Variable(), 1])
+        self.assertEqual(program.eval(), Variable(), program)
+        program = Program([Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
+        self.assertEqual(program.eval(), Variable(), program)
 
     def test_modulate_demodulate(self):
         program = Program([Ap(), Demodulate(), Ap(), Modulate(), 999])
@@ -384,6 +422,14 @@ class TestEval(unittest.TestCase):
             [Ap(),  TrueCombinator(), Add()])
         self.assertEqual(program.eval(), Add(), str(program))
 
+        program = Program(
+            [Ap(), Ap(), TrueCombinator(), [1], Ap(), Inc(), Variable()])
+        self.assertEqual(program.eval(), [1], str(program))
+        
+        program = Program(
+            [Ap(), Ap(), TrueCombinator(), Variable(), Ap(), Inc(), 1])
+        self.assertEqual(program.eval(), Variable(), str(program))
+
     def test_false_combinator(self):
         program = Program(
             [Ap(), Ap(), FalseCombinator(), [1], Ap(), Inc(), 1])
@@ -391,6 +437,14 @@ class TestEval(unittest.TestCase):
 
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Add(), Ap(), Inc(), 1])
+        self.assertEqual(program.eval(), 2, str(program))
+        
+        program = Program(
+            [Ap(), Ap(), FalseCombinator(), [1], Ap(), Inc(), Variable()])
+        self.assertEqual(program.eval(), Variable(), str(program))
+        
+        program = Program(
+            [Ap(), Ap(), FalseCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
 
 
