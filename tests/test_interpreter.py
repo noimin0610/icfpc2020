@@ -85,6 +85,12 @@ class TestEq(unittest.TestCase):
         eq = Eq([1, 1])
         self.assertEqual(eq(), True, str(eq))
 
+    def test_not_determined_nodes(self):
+        eq = Eq([Ap(), Ap()])
+        self.assertEqual(eq(), True, str(eq))
+        eq = Eq([Ap(), Inc()])
+        self.assertEqual(eq(), False, str(eq))
+
 
 class TestLt(unittest.TestCase):
     def test_simple(self):
@@ -116,12 +122,60 @@ class TestNeg(unittest.TestCase):
         self.assertEqual(neg(), -2)
 
 
-class TestSCombinator(unittest.TestCase):
+class TestCCombinator(unittest.TestCase):
     def test_simple(self):
         s = SCombinator([Add(), Inc(), 1])
         self.assertEqual(s(), 3, str(s))
         s = SCombinator([Mul(), Add([1]), 6])
         self.assertEqual(s(), 42, str(s))
+
+
+class TestCCombinator(unittest.TestCase):
+    def test_simple(self):
+        c = CCombinator([Add(), 1, 2])
+        self.assertEqual(c(), 3, str(c))
+        c = CCombinator([Div(), 1, 2])
+        self.assertEqual(c(), 2, str(c))
+
+
+class TestBCombinator(unittest.TestCase):
+    def test_simple(self):
+        b = BCombinator([Inc(), Dec(), 0])
+        self.assertEqual(b(), 0, str(b))
+
+
+class TestTrueCombinator(unittest.TestCase):
+    def test_simple(self):
+        k = TrueCombinator([1, 5])
+        self.assertEqual(k(), 1, str(k))
+        k = TrueCombinator([TrueCombinator(), 1])
+        self.assertEqual(k(), TrueCombinator(), str(k))
+
+
+class TestFalseCombinator(unittest.TestCase):
+    def test_simple(self):
+        k = FalseCombinator([1, 5])
+        self.assertEqual(k(), 5, str(k))
+
+
+class TestICombinator(unittest.TestCase):
+    def test_simple(self):
+        i = ICombinator([1])
+        self.assertEqual(i(), 1, str(i))
+        i = ICombinator([ICombinator()])
+        self.assertEqual(i(), ICombinator(), str(i))
+        i = ICombinator([Add()])
+        self.assertEqual(i(), Add(), str(i))
+
+
+class TestPwr2(unittest.TestCase):
+    def test_simple(self):
+        p = Pwr2([1])
+        self.assertEqual(p(), 2, str(p))
+        p = Pwr2([0])
+        self.assertEqual(p(), 1, str(p))
+        p = Pwr2([8])
+        self.assertEqual(p(), 256, str(p))
 
 
 class TestEval(unittest.TestCase):
