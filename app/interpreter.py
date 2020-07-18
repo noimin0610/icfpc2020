@@ -116,6 +116,46 @@ class Lt(Node):
         return self.argv[0] < self.argv[1]
 
 
+class Modulate(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        v = self.argv[0]
+        if v==0: return '010'
+        ret = '01' if v>0 else '10'
+        binary = bin(v)[2+(v<0):]
+        l = len(binary)
+        bitlen = 0--l//4*4
+        ret += '1'*(bitlen//4) + '0'
+        ret += '0'*(bitlen - l) + binary
+        return ret
+
+
+class Demodulate(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        s = self.argv[0] # must be 01-string
+        if s=='010': return 0
+        neg = s.startswith('10')
+        i = 2
+        while s[i]=='1':
+            i += 1
+        v = int(s[i+1:], 2)
+        if neg: v *= -1
+        return v
+
+
 class Neg(Node):
     def __init__(self, argv=None):
         self.argc = 1
