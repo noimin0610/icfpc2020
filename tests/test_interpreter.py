@@ -388,7 +388,7 @@ class TestEval(unittest.TestCase):
         program = Program([Ap(), Ap(), Eq(), -5, Ap(), Ap(),
                            Mul(), Ap(), Inc(), 4, Ap(), Dec(), 0])
         self.assertEqual(program.eval(), True, str(program))
-        
+
         program = Program([Ap(), Ap(), Add(), -2, Ap(), Neg(), Variable()])
         self.assertEqual(program.eval(), Variable(), program)
 
@@ -398,11 +398,14 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
         self.assertEqual(program.eval(), 42, str(program))
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable()])
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable()])
         self.assertEqual(program.eval(), Variable(), program)
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Variable(), 1])
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Add(), Variable(), 1])
         self.assertEqual(program.eval(), Variable(), program)
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
         self.assertEqual(program.eval(), Variable(), program)
 
     def test_modulate_demodulate(self):
@@ -425,7 +428,7 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), TrueCombinator(), [1], Ap(), Inc(), Variable()])
         self.assertEqual(program.eval(), [1], str(program))
-        
+
         program = Program(
             [Ap(), Ap(), TrueCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), Variable(), str(program))
@@ -438,15 +441,57 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Add(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
-        
+
         program = Program(
             [Ap(), Ap(), FalseCombinator(), [1], Ap(), Inc(), Variable()])
         self.assertEqual(program.eval(), Variable(), str(program))
-        
+
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
 
+
+class TestEvalListConstruction(unittest.TestCase):
+    def test_nil(self):
+        program = Program([ListConstructionOpen(), ListConstructionClose()])
+        program.eval_list_construction()
+        self.assertEqual(program.nodes, [Nil()], str(program))
+
+        program = Program([
+            Ap(), ListConstructionOpen(), ListConstructionClose()
+        ])
+        program.eval_list_construction()
+        self.assertEqual(program.nodes, [Ap(), Nil()], str(program))
+
+    def test_single(self):
+        tokens = [ListConstructionOpen(), 1, ListConstructionClose()]
+        program = Program(tokens)
+        program.eval_list_construction()
+        expected_tokens = [Ap(), Ap(), Cons(), 1, Nil()]
+        self.assertEqual(program.nodes, expected_tokens, str(program))
+
+        tokens = [
+            ListConstructionOpen(), 1, ListConstructionDelimiter(),
+            3, ListConstructionClose()
+        ]
+        program = Program(tokens)
+        program.eval_list_construction()
+        expected_tokens = [Ap(), Ap(), Cons(), 1, Ap(), Ap(), Cons(), 3, Nil()]
+        self.assertEqual(program.nodes, expected_tokens, str(program))
+
+    def test_nested(self):
+        tokens = [
+            ListConstructionOpen(),
+            1, ListConstructionDelimiter(),
+            ListConstructionOpen(), 3, ListConstructionClose(),
+            ListConstructionClose(),
+        ]
+        program = Program(tokens)
+        program.eval_list_construction()
+        expected_tokens = [
+            Ap(), Ap(), Cons(), 1, Ap(), Ap(), Cons(), 3, Nil()
+        ]
+        self.assertEqual(program.nodes, expected_tokens, str(program))
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):

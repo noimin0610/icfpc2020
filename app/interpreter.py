@@ -416,7 +416,7 @@ class Cons(Node):
                 return Nil()
             return self.argv[:-1]
         if isinstance(self.argv[1], int) or isinstance(self.argv[1], Variable):
-           self.argv[1] = [self.argv[1]]
+            self.argv[1] = [self.argv[1]]
         return [self.argv[0]] + self.argv[1]
 
     def _add__(self, other):
@@ -527,6 +527,33 @@ class Vec(Node):
         return Cons(self.argv)
 
 
+class ListConstructionOpen(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+
+class ListConstructionDelimiter(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+
+class ListConstructionClose(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -555,6 +582,31 @@ class Program:
         for _ in range(args_num):
             op.apply(self._recursive_eval())
         return op() if op.has_full_args() else op
+
+    def eval_list_construction(self):
+        open_stack = []
+        nodes = self.nodes
+        cur = 0
+        while cur < len(nodes):
+            if isinstance(nodes[cur], ListConstructionOpen):
+                open_stack.append(cur)
+            elif isinstance(nodes[cur], ListConstructionClose):
+                start = open_stack.pop()
+                end = cur
+                if start + 1 == end:
+                    elements = Nil()
+                    cur -= 1
+                else:
+                    elements = [Ap(), Ap(), Cons()]
+                    for i in range(start+1, end):
+                        if isinstance(nodes[i], ListConstructionDelimiter):
+                            elements.extend([Ap(), Ap(), Cons()])
+                        else:
+                            elements.append(nodes[i])
+                    cur += len(elements)-(end-start)  # TODO
+                nodes = nodes[:start] + [elements] + nodes[end+1:]
+            cur += 1  # TODO
+        self.nodes = nodes
 
 
 def parse(tokens):
@@ -606,6 +658,12 @@ def parse(tokens):
             nodes.append(Modulate())
         elif t == 'dem':
             nodes.append(Demodulate())
+        elif t == '(':
+            nodes.append(ListConstructionOpen())
+        elif t == ',':
+            nodes.append(ListConstructionDelimiter())
+        elif t == ')':
+            nodes.append(ListConstructionClose())
         elif t.startswith(':'):
             nodes.append(Variable())
         else:
