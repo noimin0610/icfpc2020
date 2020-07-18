@@ -4,6 +4,31 @@
 
 import sys
 
+# DEFINED_NODE_GENERATORS = {
+#     'statelessdraw': lambda: CCombinator([
+#         BCombinator([
+#             BCombinator(),
+#             BCombinator([
+#                 BCombinator([Cons([0])]),
+#                 CCombinator([
+#                     BCombinator([
+#                         BCombinator(),
+#                         Cons(),
+#                     ]),
+#                     CCombinator([Cons(), Nil()])
+#                 ])
+#             ])
+#         ]),
+#         CCombinator([
+#             BCombinator([
+#                 Cons(),
+#                 CCombinator([Cons(), Nil()])
+#             ]),
+#             Nil()
+#         ])
+#     ])
+# }
+
 
 class Node:
     def __init__(self, argv=None):
@@ -218,6 +243,53 @@ class Demodulate(Node):
         if neg:
             v *= -1
         return v
+
+
+# class Modem(Node):
+#     def __init__(self, argv=None):
+#         self.argc = 1
+#         if argv:
+#             self.argv = argv[:]
+#         else:
+#             self.argv = []
+
+#     def __call__(self):
+#         # ap modem x0 = ap dem ap mod x0 = dem(mod(x0))
+#         if len(self.argv) < self.argc:
+#             return self
+#         if isinstance(self.argv[0], Variable):
+#             return Variable()
+#         return Demodulate([Modulate.modulate(self.argv[0])])()
+
+
+# class F38(Node):
+#     def __init__(self, argv=None):
+#         self.argc = 1
+#         if argv:
+#             self.argv = argv[:]
+#         else:
+#             self.argv = []
+
+#     def __call__(self):
+#         if len(self.argv) < self.argc:
+#             return self
+#         if isinstance(self.argv[0], Variable):
+#             return Variable()
+
+
+# class Interact(Node):
+#     def __init__(self, argv=None):
+#         self.argc = 1
+#         if argv:
+#             self.argv = argv[:]
+#         else:
+#             self.argv = []
+
+#     def __call__(self):
+#         if len(self.argv) < self.argc:
+#             return self
+#         if isinstance(self.argv[0], Variable):
+#             return Variable()
 
 
 class Neg(Node):
@@ -521,6 +593,53 @@ class Vec(Node):
         return Cons(self.argv)
 
 
+class If0(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
+        return self.argv[1] if self.argv[0] == 0 else self.argv[2]
+
+
+class Picture:
+    def __init__(self, dots=None):
+        self.dots = set()
+        if dots:
+            for x, y in dots:
+                self.dots.add((x, y))
+
+    def add_dot(self, x, y):
+        self.dots.add((x, y))
+
+
+class Draw(Node):
+    """
+    Args:
+        argv[0]: List<List<(int, int)>>
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
+        pic = Picture()
+        for dot in self.argv[0]:
+            pic.add_dot(dot[0], dot[1])
+        return pic
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -602,6 +721,31 @@ def parse(tokens):
             nodes.append(Demodulate())
         elif t.startswith(':'):
             nodes.append(Variable())
+        elif t == 'send':
+            nodes.append(None)
+        elif t == '(':
+            nodes.append(Demodulate())
+        elif t == ')':
+            nodes.append(Demodulate())
+        elif t == 'draw':
+            nodes.append(Draw())
+        elif t == 'vec':
+            nodes.append(Vec())
+        # elif t == 'checkerboard':
+        #     nodes.append(None)
+        # elif t == 'multipledraw':
+        #     nodes.append(None)
+        elif t == 'if0':
+            nodes.append(If0())
+        # elif t == 'modem':
+        #     nodes.append(Modem())
+        # elif t == 'interact':
+        #     nodes.append(Interact())
+        # elif t == 'f38':
+        #     nodes.append(F38())
+        # elif t == 'statelessdraw':
+        #     nodes.append(DEFINED_NODE_GENERATORS[t]())
+
         else:
             # number
             nodes.append(int(t))
