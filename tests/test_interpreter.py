@@ -141,6 +141,47 @@ class TestModulate(unittest.TestCase):
         self.assertEqual(mod(), [1, 0, 1, 1, 1, 0, 0,
                                  0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], str(mod))
 
+    def test_modulate_nil(self):
+        mod = Modulate([Nil()])
+        self.assertEqual(mod(), [0, 0], str(mod))
+
+    def test_modulate_list(self):
+        mod = Modulate([[Nil(), Nil()]])
+        self.assertEqual(mod(), [1, 1, 0, 0, 0, 0], str(mod))
+        mod = Modulate([[1, 2]])
+        self.assertEqual(mod(), [1, 1, 0, 1, 1, 0, 0,
+                                 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, ], str(mod))
+
+    def test_modulate_nested_list(self):
+        mod = Modulate([[1, [2]]])
+        self.assertEqual(mod(), [
+            1, 1,
+            0, 1, 1, 0, 0, 0, 0, 1,
+            1, 1,
+            0, 1, 1, 0, 0, 0, 1, 0,
+        ], str(mod))
+
+    def test_modulate_list_program(self):
+        program = Program([Ap(), Modulate(), Nil()])
+        self.assertEqual(program.eval(), [1, 1], str(program))
+        program = Program([Ap(), Modulate(), Ap(), Ap(), Cons(), Nil(), Nil()])
+        self.assertEqual(program.eval(), [1, 1, 0, 0, 0, 0], str(program))
+        program = Program([Ap(), Modulate(), Ap(), Ap(), Cons(), 0, Nil()])
+        self.assertEqual(program.eval(), [1, 1, 0, 1, 0, 0, 0], str(program))
+        program = Program([Ap(), Modulate(), Ap(), Ap(), Cons(), 1, 2])
+        self.assertEqual(program.eval(), [
+                         1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0], str(program))
+        program = Program([Ap(), Modulate(), Ap(), Ap(),
+                           Cons(), 1, Ap(), Ap(), Cons(), 2, Nil()])
+        self.assertEqual(program.eval(), [
+                         1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0], str(program))
+        program = Program([Ap(), Modulate(), [1, 2]])
+        self.assertEqual(program.eval(), [
+                         1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0], str(program))
+        program = Program([Ap(), Modulate(), [1, [2, 3], 4]])
+        self.assertEqual(program.eval(), [1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0,
+                                          1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0], str(program))
+
 
 class TestDemodulate(unittest.TestCase):
     def test_simple(self):
@@ -351,6 +392,7 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Add(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
+
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):

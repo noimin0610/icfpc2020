@@ -145,16 +145,39 @@ class Modulate(Node):
             self.argv = []
 
     def __call__(self):
-        v = self.argv[0]
+        return Modulate.modulate(self.argv[0])
+
+    def modulate(v):
+        if v == [Nil()]:
+            return [1, 1]
+        if isinstance(v, Nil):
+            return Modulate.modulate_nil(v)
+        elif isinstance(v, list):
+            return Modulate.modulate_list(v)
+        elif isinstance(v, int):
+            return Modulate.modulate_int(v)
+        else:
+            print(v, file=sys.stderr)
+
+    def modulate_int(v):
         if v == 0:
             return [0, 1, 0]
         ret = [0, 1] if v > 0 else [1, 0]
         binary = bin(v)[2+(v < 0):]
         l = len(binary)
-        bitlen = 0--l//4*4
+        bitlen = 0 - -l//4*4
         ret += [1]*(bitlen//4) + [0]
         ret += [0]*(bitlen - l) + [int(c) for c in binary]
         return ret
+
+    def modulate_list(v):
+        ret = [1, 1]
+        for e in v:
+            ret.extend(Modulate.modulate(e))
+        return ret
+
+    def modulate_nil(nil):
+        return [0, 0]
 
 
 class Demodulate(Node):
@@ -544,6 +567,10 @@ def parse(tokens):
             nodes.append(Nil())
         elif t == 'isnil':
             nodes.append(IsNil())
+        elif t == 'mod':
+            nodes.append(Modulate())
+        elif t == 'dem':
+            nodes.append(Demodulate())
         elif t.startswith(':'):
             nodes.append(Variable())
         else:
