@@ -23,6 +23,9 @@ class Node:
     def __str__(self):
         return '{}({})'.format(self.__class__.__name__, ','.join([str(arg) for arg in self.argv]) + ','*(self.argc-1 - len(self.argv)))
 
+    def __eq__(self, other):
+        return type(self) == type(other) and self.argv == other.argv
+
 
 class Inc(Node):
     def __init__(self, argv=None):
@@ -156,6 +159,103 @@ class SCombinator(Node):
         return xz.apply(yz)()
 
 
+class CCombinator(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # ap x y z  =>  x(z)(y)
+        if not isinstance(self.argv[2], int):
+            self.argv[2] = self.argv[2]()
+        self.argv[0].apply(self.argv[2]).apply(self.argv[1])
+        return self.argv[0]()
+
+
+class BCombinator(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # ap x y z  =>  x(y(z))
+        if not isinstance(self.argv[2], int):
+            self.argv[2] = self.argv[2]()
+
+        yz = self.argv[1].apply(self.argv[2])()
+        xyz = self.argv[0].apply(yz)
+        return xyz()
+
+
+class TrueCombinator(Node):
+    """True or K Combinator
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 2
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # 引数がない場合はTrue
+        if len(self.argv) == 0:
+            return TrueCombinator()
+        # 引数があればK Combinator
+        if not isinstance(self.argv[0], int):
+            self.argv[0] = self.argv[0]()
+        return self.argv[0]
+
+
+class FalseCombinator(Node):
+    """False or Combinator
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 2
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # 引数がない場合はFalse
+        if len(self.argv) == 0:
+            return FalseCombinator()
+        # 引数があればCombinator
+        if not isinstance(self.argv[1], int):
+            self.argv[1] = self.argv[1]()
+        return self.argv[1]
+
+
+class ICombinator(Node):
+    """Constant Combinator
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # i(x) = x
+        return self.argv[0]
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -214,6 +314,16 @@ def parse(tokens):
             nodes.append(Ap())
         elif t == 's':
             nodes.append(SCombinator())
+        elif t == 'c':
+            nodes.append(CCombinator())
+        elif t == 'b':
+            nodes.append(BCombinator())
+        elif t == 't':
+            nodes.append(TrueCombinator())
+        elif t == 'f':
+            nodes.append(FalseCombinator())
+        elif t == 'i':
+            nodes.append(ICombinator())
         else:
             # number
             nodes.append(int(t))
