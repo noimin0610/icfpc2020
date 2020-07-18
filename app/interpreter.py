@@ -271,18 +271,28 @@ class Pwr2(Node):
 class Cons(Node):
     def __init__(self, argv=None):
         self.argc = 2
-        while argv and isinstance(argv[-1], Nil):
-            argv.pop()
         if argv:
             self.argv = argv[:]
         else:
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) < 2:
+            return self
         if isinstance(self.argv[-1], Nil):
+            if isinstance(self.argv[0], Nil):
+                return Nil
             return self.argv[:-1]
+        return [self.argv[0]] + self.argv[1]
 
-        return self.argv
+    def _add__(self, other):
+        if not self.argv and not other.argv:
+            assert False, "unreachable"
+        if not self.argv:
+            return Cons([other.argv])
+        if not other.argv:
+            return Cons([self.argv])
+        return Cons([self.argv + other.argv])
 
     def __getitem__(self, index):
         assert index < len(self.argv)
@@ -375,7 +385,7 @@ class Program:
         """
         self.i = 0
         node = self._recursive_eval()
-        return node if isinstance(node, int) else node()
+        return node if isinstance(node, int) or isinstance(node, list) else node()
 
     def _recursive_eval(self):
         if not isinstance(self.nodes[self.i], Ap):
@@ -390,6 +400,7 @@ class Program:
         for _ in range(args_num):
             op.apply(self._recursive_eval())
         return op() if op.has_full_args() else op
+
 
 def parse(tokens):
     nodes = []
