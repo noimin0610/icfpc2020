@@ -15,7 +15,7 @@ def main():
         exit(2)
     print('Server response:', res.text)
 
-    aliens_api = server_url + '/aliens/send/'
+    aliens_api = server_url + '/aliens/send'
     data = "string"
     url = aliens_api
     print('URL:', url)
