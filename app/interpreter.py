@@ -45,7 +45,7 @@ class Inc(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         return self.argv[0] + 1
 
 
@@ -61,7 +61,7 @@ class Dec(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         return self.argv[0] - 1
 
 
@@ -76,9 +76,9 @@ class Add(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
-        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
-            return Variable()
-        return self.argv[0] + self.argv[1]
+        if isinstance(self.argv[0], int) and isinstance(self.argv[1], int):
+            return self.argv[0] + self.argv[1]
+        return self
 
 
 class Mul(Node):
@@ -90,10 +90,12 @@ class Mul(Node):
             self.argv = []
 
     def __call__(self):
+        if len(self.argv) == 1 and self.argv[0] == 0:
+            return 0
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
-            return Variable()
+            return self
         return self.argv[0]*self.argv[1]
 
 
@@ -108,10 +110,12 @@ class Div(Node):
     def __call__(self):
         """整数除算
         """
+        if len(self.argv) == 1 and self.argv[0] == 0:
+            return 0
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
-            return Variable()
+            return self
         if self.argv[0]*self.argv[1] < 0:
             return abs(self.argv[0])//abs(self.argv[1]) * -1
         else:
@@ -130,8 +134,10 @@ class Eq(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
-            return Variable()
-        return self.argv[0] == self.argv[1]
+            if self.argv[0] == self.argv[1]:
+                return TrueCombinator()
+            return self
+        return TrueCombinator() if self.argv[0] == self.argv[1] else FalseCombinator()
 
 
 class Lt(Node):
@@ -146,8 +152,10 @@ class Lt(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable):
-            return Variable()
-        return self.argv[0] < self.argv[1]
+            if self.argv[0] == self.argv[1]:
+                return False
+            return self
+        return TrueCombinator() if self.argv[0] < self.argv[1] else FalseCombinator()
 
 
 class Modulate(Node):
@@ -232,7 +240,7 @@ class Neg(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         return -self.argv[0]
 
 
@@ -249,7 +257,7 @@ class Ap(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         return self.argv[0].apply(self.argv[1])
 
 
@@ -266,12 +274,16 @@ class SCombinator(Node):
         # ap x y z  =>  x(z)(y(z))
         if len(self.argv) < self.argc:
             return self
-        if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable) or isinstance(self.argv[2], Variable):
-            return Variable()
-        if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
-            self.argv[2] = self.argv[2]()
-        yz = self.argv[1].apply(self.argv[2])()
-        xz = self.argv[0].apply(self.argv[2])
+        # if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable) or isinstance(self.argv[2], Variable):
+        #     return self
+        # for i in range(self.argc):
+        #     if not isinstance(self.argv[i], int) and not isinstance(self.argv[i], list):
+        #         self.argv[i] = self.argv[i]()
+        x = self.argv[0]
+        y = self.argv[1]
+        z = self.argv[2]
+        yz = y.apply(z)() if not isinstance(y, Variable) else Ap([y, z])()
+        xz = x.apply(z) if not isinstance(x, Variable) else Ap([x, z])
         return xz.apply(yz)()
 
 
@@ -289,7 +301,7 @@ class CCombinator(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable) or isinstance(self.argv[1], Variable) or isinstance(self.argv[2], Variable):
-            return Variable()
+            return self
         if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
         self.argv[0].apply(self.argv[2]).apply(self.argv[1])
@@ -310,7 +322,7 @@ class BCombinator(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
 
@@ -396,7 +408,7 @@ class Pwr2(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         return pow(2, self.argv[0])
 
 
@@ -416,7 +428,9 @@ class Cons(Node):
                 return Nil()
             return self.argv[:-1]
         if isinstance(self.argv[1], int) or isinstance(self.argv[1], Variable):
-           self.argv[1] = [self.argv[1]]
+            self.argv[1] = [self.argv[1]]
+        elif isinstance(self.argv[1], Node):
+            self.argv[1] = self.argv[1]()
         return [self.argv[0]] + self.argv[1]
 
     def _add__(self, other):
@@ -502,14 +516,17 @@ class IsNil(Node):
         if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[0], Variable):
-            return Variable()
+            return self
         return TrueCombinator() if isinstance(self.argv[0], Nil) else FalseCombinator()
 
 
 class Variable(Node):
     def __init__(self, argv=None):
-        self.argc = 0
-        self.argv = []
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
 
     def __call__(self):
         return self
@@ -607,7 +624,7 @@ def parse(tokens):
         elif t == 'dem':
             nodes.append(Demodulate())
         elif t.startswith(':'):
-            nodes.append(Variable())
+            nodes.append(Variable([t]))
         else:
             # number
             nodes.append(int(t))

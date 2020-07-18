@@ -77,37 +77,37 @@ class TestDiv(unittest.TestCase):
 class TestEq(unittest.TestCase):
     def test_simple(self):
         eq = Eq([0, -2])
-        self.assertEqual(eq(), False, str(eq))
+        self.assertEqual(eq(), FalseCombinator(), str(eq))
         eq = Eq([-4, -2])
-        self.assertEqual(eq(), False, str(eq))
+        self.assertEqual(eq(), FalseCombinator(), str(eq))
         eq = Eq([-2, -2])
-        self.assertEqual(eq(), True, str(eq))
+        self.assertEqual(eq(), TrueCombinator(), str(eq))
         eq = Eq([1, 1])
-        self.assertEqual(eq(), True, str(eq))
+        self.assertEqual(eq(), TrueCombinator(), str(eq))
 
     def test_not_determined_nodes(self):
         eq = Eq([Ap(), Ap()])
-        self.assertEqual(eq(), True, str(eq))
+        self.assertEqual(eq(), TrueCombinator(), str(eq))
         eq = Eq([Ap(), Inc()])
-        self.assertEqual(eq(), False, str(eq))
+        self.assertEqual(eq(), FalseCombinator(), str(eq))
 
 
 class TestLt(unittest.TestCase):
     def test_simple(self):
         lt = Lt([0, -1])
-        self.assertEqual(lt(), False, str(lt))
+        self.assertEqual(lt(), FalseCombinator(), str(lt))
         lt = Lt([0, 0])
-        self.assertEqual(lt(), False, str(lt))
+        self.assertEqual(lt(), FalseCombinator(), str(lt))
         lt = Lt([0, 1])
-        self.assertEqual(lt(), True, str(lt))
+        self.assertEqual(lt(), TrueCombinator(), str(lt))
         lt = Lt([1, 2])
-        self.assertEqual(lt(), True, str(lt))
+        self.assertEqual(lt(), TrueCombinator(), str(lt))
         lt = Lt([-19, -20])
-        self.assertEqual(lt(), False, str(lt))
+        self.assertEqual(lt(), FalseCombinator(), str(lt))
         lt = Lt([-20, -20])
-        self.assertEqual(lt(), False, str(lt))
+        self.assertEqual(lt(), FalseCombinator(), str(lt))
         lt = Lt([-21, -20])
-        self.assertEqual(lt(), True, str(lt))
+        self.assertEqual(lt(), TrueCombinator(), str(lt))
 
 
 class TestModulate(unittest.TestCase):
@@ -332,27 +332,27 @@ class TestVariable(unittest.TestCase):
     def test_simple(self):
         variable = Variable()
         self.assertEqual(variable(), Variable())
-        inc = Inc([Variable()])
-        self.assertEqual(inc(), Variable())
-        dec = Dec([Variable()])
-        self.assertEqual(dec(), Variable())
-        add = Add([Variable(), 2])
-        self.assertEqual(add(), Variable())
-        mul = Mul([Variable(), 2])
-        self.assertEqual(mul(), Variable())
-        div = Div([Variable(), 2])
-        self.assertEqual(div(), Variable())
-        eq = Eq([Variable(), 2])
-        self.assertEqual(eq(), Variable())
-        lt = Lt([Variable(), 2])
-        self.assertEqual(lt(), Variable())
-        # Modulate, Demodulate は考慮しない
-        neg = Neg([Variable()])
-        self.assertEqual(neg(), Variable())
-        pwr2 = Pwr2([Variable()])
-        self.assertEqual(pwr2(), Variable())
-        isnil = IsNil([Variable()])
-        self.assertEqual(isnil(), Variable())
+        # inc = Inc([Variable()])
+        # self.assertEqual(inc(), Variable())
+        # dec = Dec([Variable()])
+        # self.assertEqual(dec(), Variable())
+        # add = Add([Variable(), 2])
+        # self.assertEqual(add(), Variable())
+        # mul = Mul([Variable(), 2])
+        # self.assertEqual(mul(), Variable())
+        # div = Div([Variable(), 2])
+        # self.assertEqual(div(), Variable())
+        # eq = Eq([Variable(), 2])
+        # self.assertEqual(eq(), Variable())
+        # lt = Lt([Variable(), 2])
+        # self.assertEqual(lt(), Variable())
+        # # Modulate, Demodulate は考慮しない
+        # neg = Neg([Variable()])
+        # self.assertEqual(neg(), Variable())
+        # pwr2 = Pwr2([Variable()])
+        # self.assertEqual(pwr2(), Variable())
+        # isnil = IsNil([Variable()])
+        # self.assertEqual(isnil(), Variable())
 
 
 class TestVec(unittest.TestCase):
@@ -375,22 +375,22 @@ class TestEval(unittest.TestCase):
     def test_single_ap(self):
         program = Program([Ap(), Ap(), Add(), -2, 12])
         self.assertEqual(program.eval(), 10, str(program))
-        program = Program([Ap(), Ap(), Add(), -2, Variable()])
-        self.assertEqual(program.eval(), Variable(), program)
+        program = Program([Ap(), Ap(), Add(), -2, Variable([':1'])])
+        self.assertEqual(program.eval(), Add([-2, Variable([':1'])]), program)
 
     def test_multi_ap(self):
         program = Program([Ap(), Ap(), Add(), -2, Ap(), Neg(), 5])
         self.assertEqual(program.eval(), -7, str(program))
 
         program = Program([Ap(), Ap(), Lt(), -2, Ap(), Ap(), Mul(), 5, -1])
-        self.assertEqual(program.eval(), False, str(program))
+        self.assertEqual(program.eval(), FalseCombinator(), str(program))
 
         program = Program([Ap(), Ap(), Eq(), -5, Ap(), Ap(),
                            Mul(), Ap(), Inc(), 4, Ap(), Dec(), 0])
-        self.assertEqual(program.eval(), True, str(program))
-        
+        self.assertEqual(program.eval(), TrueCombinator(), str(program))
+
         program = Program([Ap(), Ap(), Add(), -2, Ap(), Neg(), Variable()])
-        self.assertEqual(program.eval(), Variable(), program)
+        self.assertEqual(program.eval(), Add([-2, Neg([Variable()])]), program)
 
     def test_s_combinator(self):
         program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), 1])
@@ -398,12 +398,18 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
         self.assertEqual(program.eval(), 42, str(program))
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable()])
-        self.assertEqual(program.eval(), Variable(), program)
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Variable(), 1])
-        self.assertEqual(program.eval(), Variable(), program)
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
-        self.assertEqual(program.eval(), Variable(), program)
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable([':1'])])
+        self.assertEqual(program.eval(), Add(
+            [Variable([':1']), Inc([Variable([':1'])])]), program)
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Add(), Variable([':1']), 1])
+        self.assertEqual(program.eval(), Add(
+            [1, Ap([Variable([':1']), 1])]), program)
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
+        self.assertEqual(program.eval(), Ap(
+            [Ap([Variable(), 1]), Inc([1])]), program)
 
     def test_modulate_demodulate(self):
         program = Program([Ap(), Demodulate(), Ap(), Modulate(), 999])
@@ -425,7 +431,7 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), TrueCombinator(), [1], Ap(), Inc(), Variable()])
         self.assertEqual(program.eval(), [1], str(program))
-        
+
         program = Program(
             [Ap(), Ap(), TrueCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), Variable(), str(program))
@@ -438,11 +444,11 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Add(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
-        
+
         program = Program(
             [Ap(), Ap(), FalseCombinator(), [1], Ap(), Inc(), Variable()])
-        self.assertEqual(program.eval(), Variable(), str(program))
-        
+        self.assertEqual(program.eval(), Inc([Variable()]), str(program))
+
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
