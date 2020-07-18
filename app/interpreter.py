@@ -15,12 +15,16 @@ class Node:
 
     def apply(self, v):
         self.argv.append(v)
+        return self
 
     def has_full_args(self):
         return len(self.argv) == self.argc
 
     def __str__(self):
         return '{}({})'.format(self.__class__.__name__, ','.join([str(arg) for arg in self.argv]) + ','*(self.argc-1 - len(self.argv)))
+
+    def __eq__(self, other):
+        return type(self) == type(other) and self.argv == other.argv
 
 
 class Inc(Node):
@@ -137,6 +141,227 @@ class Ap(Node):
         return self.argv[0].apply(self.argv[1])
 
 
+class SCombinator(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # ap x y z  =>  x(z)(y(z))
+        if not isinstance(self.argv[2], int):
+            self.argv[2] = self.argv[2]()
+        yz = self.argv[1].apply(self.argv[2])()
+        xz = self.argv[0].apply(self.argv[2])
+        return xz.apply(yz)()
+
+
+class CCombinator(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # ap x y z  =>  x(z)(y)
+        if not isinstance(self.argv[2], int):
+            self.argv[2] = self.argv[2]()
+        self.argv[0].apply(self.argv[2]).apply(self.argv[1])
+        return self.argv[0]()
+
+
+class BCombinator(Node):
+    def __init__(self, argv=None):
+        self.argc = 3
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # ap x y z  =>  x(y(z))
+        if not isinstance(self.argv[2], int):
+            self.argv[2] = self.argv[2]()
+
+        yz = self.argv[1].apply(self.argv[2])()
+        xyz = self.argv[0].apply(yz)
+        return xyz()
+
+
+class TrueCombinator(Node):
+    """True or K Combinator
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 2
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # 引数がない場合はTrue
+        if len(self.argv) == 0:
+            return TrueCombinator()
+        # 引数があればK Combinator
+        if not isinstance(self.argv[0], int):
+            self.argv[0] = self.argv[0]()
+        return self.argv[0]
+
+
+class FalseCombinator(Node):
+    """False or Combinator
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 2
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # 引数がない場合はFalse
+        if len(self.argv) == 0:
+            return FalseCombinator()
+        # 引数があればCombinator
+        if not isinstance(self.argv[1], int):
+            self.argv[1] = self.argv[1]()
+        return self.argv[1]
+
+
+class ICombinator(Node):
+    """Constant Combinator
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+        self.is_combinator = True
+
+    def __call__(self):
+        # i(x) = x
+        return self.argv[0]
+
+
+class Pwr2(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return pow(2, self.argv[0])
+
+
+class Cons(Node):
+    def __init__(self, argv=None):
+        self.argc = 2
+        while argv and isinstance(argv[-1], Nil):
+            argv.pop()
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if isinstance(self.argv[-1], Nil):
+            return self.argv[:-1]
+
+        return self.argv
+
+    def __getitem__(self, index):
+        assert index < len(self.argv)
+        return self.argv[index]
+
+
+class Car(Node):
+    """Car or Head
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        # TODO: impl for `ap car x2   =   ap x2 t`
+        assert isinstance(self.argv[0], Cons)
+        return self.argv[0][0]
+
+
+class Cdr(Node):
+    """ Cdr or Tail
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        # TODO: impl for `ap car x2   =   ap x2 f`
+        assert isinstance(self.argv[0], Cons)
+        return self.argv[0][-1]
+
+
+class Nil(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if self.argv:
+            return TrueCombinator()
+        else:
+            return Nil()
+
+
+class IsNil(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return TrueCombinator() if isinstance(self.argv[0], Nil) else FalseCombinator()
+
+
+class Vec(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return Cons(self.argv)
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -148,29 +373,23 @@ class Program:
     def eval(self):
         """プログラムを実行する。
         """
-        ops = []
-        for node in self.nodes:
-            if isinstance(node, int):
-                if ops:
-                    ops[-1].apply(node)
-                    value_node = None
-                    while ops and ops[-1].has_full_args():
-                        op = ops.pop()
-                        node = op()
-                        if ops:
-                            ops[-1].apply(node)
-                        else:
-                            return node
-                else:
-                    return node
-            else:
-                if isinstance(node, Ap):
-                    # Apノードは使わなくても（正しいプログラムについては動くはず。）
-                    continue
-                ops.append(node)
+        self.i = 0
+        node = self._recursive_eval()
+        return node if isinstance(node, int) else node()
 
-        return ops[0]()
-
+    def _recursive_eval(self):
+        if not isinstance(self.nodes[self.i], Ap):
+            self.i += 1
+            return self.nodes[self.i-1]
+        args_num = 0
+        while isinstance(self.nodes[self.i], Ap):
+            args_num += 1
+            self.i += 1
+        op = self.nodes[self.i]
+        self.i += 1
+        for _ in range(args_num):
+            op.apply(self._recursive_eval())
+        return op() if op.has_full_args() else op
 
 def parse(tokens):
     nodes = []
@@ -193,6 +412,30 @@ def parse(tokens):
             nodes.append(Neg())
         elif t == 'ap':
             nodes.append(Ap())
+        elif t == 's':
+            nodes.append(SCombinator())
+        elif t == 'c':
+            nodes.append(CCombinator())
+        elif t == 'b':
+            nodes.append(BCombinator())
+        elif t == 't':
+            nodes.append(TrueCombinator())
+        elif t == 'f':
+            nodes.append(FalseCombinator())
+        elif t == 'i':
+            nodes.append(ICombinator())
+        elif t == 'pwr2':
+            nodes.append(Pwr2())
+        elif t == 'cons':
+            nodes.append(Cons())
+        elif t == 'car':
+            nodes.append(Car())
+        elif t == 'cdr':
+            nodes.append(Cdr())
+        elif t == 'nil':
+            nodes.append(Nil())
+        elif t == 'isnil':
+            nodes.append(IsNil())
         else:
             # number
             nodes.append(int(t))

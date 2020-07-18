@@ -85,6 +85,12 @@ class TestEq(unittest.TestCase):
         eq = Eq([1, 1])
         self.assertEqual(eq(), True, str(eq))
 
+    def test_not_determined_nodes(self):
+        eq = Eq([Ap(), Ap()])
+        self.assertEqual(eq(), True, str(eq))
+        eq = Eq([Ap(), Inc()])
+        self.assertEqual(eq(), False, str(eq))
+
 
 class TestLt(unittest.TestCase):
     def test_simple(self):
@@ -116,13 +122,121 @@ class TestNeg(unittest.TestCase):
         self.assertEqual(neg(), -2)
 
 
+class TestCCombinator(unittest.TestCase):
+    def test_simple(self):
+        s = SCombinator([Add(), Inc(), 1])
+        self.assertEqual(s(), 3, str(s))
+        s = SCombinator([Mul(), Add([1]), 6])
+        self.assertEqual(s(), 42, str(s))
+
+
+class TestCCombinator(unittest.TestCase):
+    def test_simple(self):
+        c = CCombinator([Add(), 1, 2])
+        self.assertEqual(c(), 3, str(c))
+        c = CCombinator([Div(), 1, 2])
+        self.assertEqual(c(), 2, str(c))
+
+
+class TestBCombinator(unittest.TestCase):
+    def test_simple(self):
+        b = BCombinator([Inc(), Dec(), 0])
+        self.assertEqual(b(), 0, str(b))
+
+
+class TestTrueCombinator(unittest.TestCase):
+    def test_simple(self):
+        k = TrueCombinator([1, 5])
+        self.assertEqual(k(), 1, str(k))
+        k = TrueCombinator([TrueCombinator(), 1])
+        self.assertEqual(k(), TrueCombinator(), str(k))
+
+
+class TestFalseCombinator(unittest.TestCase):
+    def test_simple(self):
+        k = FalseCombinator([1, 5])
+        self.assertEqual(k(), 5, str(k))
+
+
+class TestICombinator(unittest.TestCase):
+    def test_simple(self):
+        i = ICombinator([1])
+        self.assertEqual(i(), 1, str(i))
+        i = ICombinator([ICombinator()])
+        self.assertEqual(i(), ICombinator(), str(i))
+        i = ICombinator([Add()])
+        self.assertEqual(i(), Add(), str(i))
+
+
+class TestPwr2(unittest.TestCase):
+    def test_simple(self):
+        p = Pwr2([1])
+        self.assertEqual(p(), 2, str(p))
+        p = Pwr2([0])
+        self.assertEqual(p(), 1, str(p))
+        p = Pwr2([8])
+        self.assertEqual(p(), 256, str(p))
+
+
+class TestCons(unittest.TestCase):
+    def test_simple(self):
+        cons = Cons([1, 2])
+        self.assertEqual(cons(), [1, 2])
+        cons = Cons([1, Nil()])
+        self.assertEqual(cons(), [1])
+
+
+class TestCar(unittest.TestCase):
+    def test_simple(self):
+        car = Car([Cons([1, 2])])
+        self.assertEqual(car(), 1)
+        car = Car([Cons([10, Nil()])])
+        self.assertEqual(car(), 10)
+
+
+class TestCdr(unittest.TestCase):
+    def test_simple(self):
+        cdr = Cdr([Cons([1, 2])])
+        self.assertEqual(cdr(), 2)
+        cdr = Cdr([Cons([10, Nil()])])
+        self.assertEqual(cdr(), 10)
+
+
+class TestNil(unittest.TestCase):
+    def test_simple(self):
+        nil = Nil()
+        self.assertEqual(nil(), Nil())
+        nil = Nil([1])
+        self.assertEqual(nil(), TrueCombinator())
+
+
+class TestIsNil(unittest.TestCase):
+    def test_simple(self):
+        isnil = IsNil([Nil()])
+        self.assertEqual(isnil(), TrueCombinator())
+        isnil = IsNil([Cons([1, 2])])
+        self.assertEqual(isnil(), FalseCombinator())
+
+
+class TestVec(unittest.TestCase):
+    def test_simple(self):
+        vec = Vec()
+        self.assertEqual(vec(), Cons())
+        argv = [1, 2]
+        vec = Vec(argv)
+        self.assertEqual(vec(), Cons(argv))
+        argv = [1, Nil()]
+        vec = Vec(argv)
+        self.assertEqual(vec(), Cons(argv))
+
+
 class TestEval(unittest.TestCase):
     def test_only_number(self):
         program = Program([2])
         self.assertEqual(program.eval(), 2, str(program))
 
     def test_single_ap(self):
-        program = Program([Ap(), Add(), -2, 12])
+        program = Program([Ap(), Ap(), Add(), -2, 12])
         self.assertEqual(program.eval(), 10, str(program))
 
     def test_multi_ap(self):
@@ -136,6 +250,12 @@ class TestEval(unittest.TestCase):
                            Mul(), Ap(), Inc(), 4, Ap(), Dec(), 0])
         self.assertEqual(program.eval(), True, str(program))
 
+    def test_s_combinator(self):
+        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), 1])
+        self.assertEqual(program.eval(), 3, str(program))
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
+        self.assertEqual(program.eval(), 42, str(program))
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):
