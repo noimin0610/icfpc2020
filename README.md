@@ -21,3 +21,4 @@ docker run [container-name] [args for main.py]
 |--|--|
 |app/check_result_error.txt|計算に成功した行の計算結果と与式|
 |app/check_result_success.txt|計算に失敗した行のエラー内容と与式|
+|variables_loop.txt|変数の循環参照を出力したもの|
