@@ -178,6 +178,58 @@ class TestPwr2(unittest.TestCase):
         self.assertEqual(p(), 256, str(p))
 
 
+class TestCons(unittest.TestCase):
+    def test_simple(self):
+        cons = Cons([1, 2])
+        self.assertEqual(cons(), [1, 2])
+        cons = Cons([1, Nil()])
+        self.assertEqual(cons(), [1])
+
+
+class TestCar(unittest.TestCase):
+    def test_simple(self):
+        car = Car([Cons([1, 2])])
+        self.assertEqual(car(), 1)
+        car = Car([Cons([10, Nil()])])
+        self.assertEqual(car(), 10)
+
+
+class TestCdr(unittest.TestCase):
+    def test_simple(self):
+        cdr = Cdr([Cons([1, 2])])
+        self.assertEqual(cdr(), 2)
+        cdr = Cdr([Cons([10, Nil()])])
+        self.assertEqual(cdr(), 10)
+
+
+class TestNil(unittest.TestCase):
+    def test_simple(self):
+        nil = Nil()
+        self.assertEqual(nil(), Nil())
+        nil = Nil([1])
+        self.assertEqual(nil(), TrueCombinator())
+
+
+class TestIsNil(unittest.TestCase):
+    def test_simple(self):
+        isnil = IsNil([Nil()])
+        self.assertEqual(isnil(), TrueCombinator())
+        isnil = IsNil([Cons([1, 2])])
+        self.assertEqual(isnil(), FalseCombinator())
+
+
+class TestVec(unittest.TestCase):
+    def test_simple(self):
+        vec = Vec()
+        self.assertEqual(vec(), Cons())
+        argv = [1, 2]
+        vec = Vec(argv)
+        self.assertEqual(vec(), Cons(argv))
+        argv = [1, Nil()]
+        vec = Vec(argv)
+        self.assertEqual(vec(), Cons(argv))
+
+
 class TestEval(unittest.TestCase):
     def test_only_number(self):
         program = Program([2])

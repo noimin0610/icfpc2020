@@ -268,6 +268,100 @@ class Pwr2(Node):
         return pow(2, self.argv[0])
 
 
+class Cons(Node):
+    def __init__(self, argv=None):
+        self.argc = 2
+        while argv and isinstance(argv[-1], Nil):
+            argv.pop()
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if isinstance(self.argv[-1], Nil):
+            return self.argv[:-1]
+
+        return self.argv
+
+    def __getitem__(self, index):
+        assert index < len(self.argv)
+        return self.argv[index]
+
+
+class Car(Node):
+    """Car or Head
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        # TODO: impl for `ap car x2   =   ap x2 t`
+        assert isinstance(self.argv[0], Cons)
+        return self.argv[0][0]
+
+
+class Cdr(Node):
+    """ Cdr or Tail
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        # TODO: impl for `ap car x2   =   ap x2 f`
+        assert isinstance(self.argv[0], Cons)
+        return self.argv[0][-1]
+
+
+class Nil(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if self.argv:
+            return TrueCombinator()
+        else:
+            return Nil()
+
+
+class IsNil(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return TrueCombinator() if isinstance(self.argv[0], Nil) else FalseCombinator()
+
+
+class Vec(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return Cons(self.argv)
+
+
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -332,6 +426,16 @@ def parse(tokens):
             nodes.append(ICombinator())
         elif t == 'pwr2':
             nodes.append(Pwr2())
+        elif t == 'cons':
+            nodes.append(Cons())
+        elif t == 'car':
+            nodes.append(Car())
+        elif t == 'cdr':
+            nodes.append(Cdr())
+        elif t == 'nil':
+            nodes.append(Nil())
+        elif t == 'isnil':
+            nodes.append(IsNil())
         else:
             # number
             nodes.append(int(t))
