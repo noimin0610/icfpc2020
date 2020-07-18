@@ -449,6 +449,14 @@ class IsNil(Node):
         return TrueCombinator() if isinstance(self.argv[0], Nil) else FalseCombinator()
 
 
+class Variable(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+
+    def __call__(self):
+        return self
+
+
 class Vec(Node):
     def __init__(self, argv=None):
         self.argc = 1
@@ -536,6 +544,8 @@ def parse(tokens):
             nodes.append(Nil())
         elif t == 'isnil':
             nodes.append(IsNil())
+        elif t.startswith(':'):
+            nodes.append(Variable())
         else:
             # number
             nodes.append(int(t))

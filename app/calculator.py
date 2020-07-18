@@ -3,11 +3,19 @@ from interpreter import *
 
 sys.setrecursionlimit(200000)
 
+def list_to_tokens(lis):
+    tokens = []
+    for item in lis:
+        tokens += ['ap', 'ap', 'cons', str(item)]
+    tokens.append('nil')
+
 def main(lines, root="galaxy"):
     result = {}
     has_uncalculated = True
+    print(f"all eqs: {len(lines)}")
     
     while has_uncalculated:
+        print(f"calculated eqs: {len(result)}")
         has_uncalculated = False
 
         for row_number, s in enumerate(lines):
@@ -18,12 +26,20 @@ def main(lines, root="galaxy"):
 
             # 計算済みの token があるなら置き換える
             # lines も更新
+            new_tokens = []
             for idx, token in enumerate(tokens[2:], start=2):
                 if token in result:
-                    tokens[idx] = result[token]
-            lines[row_number] = " ".join([str(token) for token in tokens])
+                    if type(result[token]) == list:
+                        new_tokens.append(list_to_tokens(result[token]))
+                    else:
+                        new_tokens.append(result[token])
+                else:
+                    new_tokens.append(token)
+            token = new_tokens
+            lines[row_number] = " ".join(tokens)
 
-            print(f"tokens: {tokens}", file=sys.stderr)
+            if new_tokens != token:
+                print(f"tokens: {tokens}", file=sys.stderr)
 
             program = None
             try:
@@ -32,11 +48,12 @@ def main(lines, root="galaxy"):
                 print(e, file=sys.stderr)
                 has_uncalculated = True
                 continue
-            print(f"program: {program}", file=sys.stderr)
+            # print(f"program: {program}", file=sys.stderr)
             try:
                 result[var] = program.eval()
                 display = '{} = {} = {}'.format(
                     tokens[0], result[var], tokens[2:])
+                print(display, file=sys.stderr)
             except EOFError:
                 pass
     
