@@ -126,9 +126,10 @@ class Modulate(Node):
 
     def __call__(self):
         v = self.argv[0]
-        if v==0: return '010'
-        ret = '01' if v>0 else '10'
-        binary = bin(v)[2+(v<0):]
+        if v == 0:
+            return '010'
+        ret = '01' if v > 0 else '10'
+        binary = bin(v)[2+(v < 0):]
         l = len(binary)
         bitlen = 0--l//4*4
         ret += '1'*(bitlen//4) + '0'
@@ -145,14 +146,16 @@ class Demodulate(Node):
             self.argv = []
 
     def __call__(self):
-        s = self.argv[0] # must be 01-string
-        if s=='010': return 0
+        s = self.argv[0]  # must be 01-string
+        if s == '010':
+            return 0
         neg = s.startswith('10')
         i = 2
-        while s[i]=='1':
+        while s[i] == '1':
             i += 1
         v = int(s[i+1:], 2)
-        if neg: v *= -1
+        if neg:
+            v *= -1
         return v
 
 
@@ -352,7 +355,7 @@ class Car(Node):
 
     def __call__(self):
         # TODO: impl for `ap car x2   =   ap x2 t`
-        assert isinstance(self.argv[0], Cons)
+        assert isinstance(self.argv[0], list)
         return self.argv[0][0]
 
 
@@ -369,7 +372,7 @@ class Cdr(Node):
 
     def __call__(self):
         # TODO: impl for `ap car x2   =   ap x2 f`
-        assert isinstance(self.argv[0], Cons)
+        assert isinstance(self.argv[0], list)
         return self.argv[0][-1]
 
 

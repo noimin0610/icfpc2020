@@ -232,7 +232,7 @@ class TestPwr2(unittest.TestCase):
 
 class TestCons(unittest.TestCase):
     def test_simple(self):
-        cons = Cons([1, 2])
+        cons = Cons([1, [2]])
         self.assertEqual(cons(), [1, 2])
         cons = Cons([1, Nil()])
         self.assertEqual(cons(), [1])
@@ -240,17 +240,18 @@ class TestCons(unittest.TestCase):
 
 class TestCar(unittest.TestCase):
     def test_simple(self):
-        car = Car([Cons([1, 2])])
+        car = Car([[1, 2]])
         self.assertEqual(car(), 1)
-        car = Car([Cons([10, Nil()])])
+        car = Car([[10]])
         self.assertEqual(car(), 10)
 
 
 class TestCdr(unittest.TestCase):
     def test_simple(self):
-        cdr = Cdr([Cons([1, 2])])
+        cdr = Cdr()
+        cdr.apply([1, 2])
         self.assertEqual(cdr(), 2)
-        cdr = Cdr([Cons([10, Nil()])])
+        cdr = Cdr([[10]])
         self.assertEqual(cdr(), 10)
 
 
@@ -312,7 +313,7 @@ class TestEval(unittest.TestCase):
     def test_modulate_demodulate(self):
         program = Program([Ap(), Demodulate(), Ap(), Modulate(), 999])
         self.assertEqual(program.eval(), 999, str(program))
-        #program = Program([Ap(), Modulate(), Ap(), Demodulate(), '01100101']) #TODO stringを扱いたい
+        # program = Program([Ap(), Modulate(), Ap(), Demodulate(), '01100101']) #TODO stringを扱いたい
         #self.assertEqual(program.eval(), '01100101', str(program))
 
 # class Test(unittest.TestCase):
