@@ -21,7 +21,13 @@ class Node:
         return len(self.argv) == self.argc
 
     def __str__(self):
-        return '{}({})'.format(self.__class__.__name__, ','.join([str(arg) for arg in self.argv]) + ','*(self.argc-1 - len(self.argv)))
+        n_applied_args = len(self.argv)
+        args = []
+        if self.argv:
+            args.append(', '.join([str(arg) for arg in self.argv]))
+        if n_applied_args < self.argc:
+            args.append(', '.join('?'*(self.argc - len(self.argv))))
+        return '{}({})'.format(self.__class__.__name__, ', '.join(args))
 
     def __eq__(self, other):
         return type(self) == type(other) and self.argv == other.argv
@@ -195,6 +201,8 @@ class SCombinator(Node):
 
     def __call__(self):
         # ap x y z  =>  x(z)(y(z))
+        if len(self.argv) < self.argc:
+            return self
         if not isinstance(self.argv[2], int):
             self.argv[2] = self.argv[2]()
         yz = self.argv[1].apply(self.argv[2])()
@@ -213,6 +221,8 @@ class CCombinator(Node):
 
     def __call__(self):
         # ap x y z  =>  x(z)(y)
+        if len(self.argv) < self.argc:
+            return self
         if not isinstance(self.argv[2], int):
             self.argv[2] = self.argv[2]()
         self.argv[0].apply(self.argv[2]).apply(self.argv[1])
@@ -230,7 +240,9 @@ class BCombinator(Node):
 
     def __call__(self):
         # ap x y z  =>  x(y(z))
-        if not isinstance(self.argv[2], int):
+        if len(self.argv) < self.argc:
+            return self
+        if not isinstance(self.argv[2], int) and not isinstance(self.argv[2], list):
             self.argv[2] = self.argv[2]()
 
         yz = self.argv[1].apply(self.argv[2])()
@@ -320,11 +332,11 @@ class Cons(Node):
             self.argv = []
 
     def __call__(self):
-        if len(self.argv) < 2:
+        if len(self.argv) < self.argc:
             return self
         if isinstance(self.argv[-1], Nil):
             if isinstance(self.argv[0], Nil):
-                return Nil
+                return Nil()
             return self.argv[:-1]
         return [self.argv[0]] + self.argv[1]
 
