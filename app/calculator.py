@@ -1,7 +1,18 @@
+"""
+Usage
+python calculator.py [input file path] 2> [stderr file] > [stdout file]
+"""
 import sys
 from interpreter import *
 
 sys.setrecursionlimit(200000)
+
+def flatten(data):
+    return [
+        element
+            for item in data
+            for element in (flatten(item) if hasattr(item, '__iter__') else [item])
+    ]
 
 def list_to_tokens(lis):
     tokens = []
@@ -38,22 +49,28 @@ def main(lines, root="galaxy"):
             token = new_tokens
             lines[row_number] = " ".join(tokens)
 
-            if new_tokens != token:
-                print(f"tokens: {tokens}", file=sys.stderr)
+            # トークン列の書き換えがあった場合はトークン列を出力
+            # if new_tokens != token:
+            #     print(f"tokens: {tokens}", file=sys.stderr)
 
             program = None
             try:
                 program = parse(tokens[2:])
             except ValueError as e:
-                print(e, file=sys.stderr)
+                # print(e, file=sys.stderr)
                 has_uncalculated = True
                 continue
             # print(f"program: {program}", file=sys.stderr)
             try:
-                result[var] = program.eval()
+                res = program.eval()
+                # 結果に Variable が含まれる場合は計算未完了とみなす
+                if "Variable" in str(res):
+                    has_uncalculated = True
+                else:
+                    result[var] = res
                 display = '{} = {} = {}'.format(
-                    tokens[0], result[var], tokens[2:])
-                print(display, file=sys.stderr)
+                    tokens[0], res, tokens[2:])
+                # print(display, file=sys.stderr)
             except EOFError:
                 pass
     
