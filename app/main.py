@@ -103,7 +103,7 @@ def get_my_ship(gameResponse) -> Ship:
     if len(gameResponse) >= 4:
         flag, gameStage, staticGameInfo, gameState, *_ = gameResponse
         if len(staticGameInfo) >= 5:
-            x0, player_role, x2, x3, x4, *_ = staticGameInfo[0], staticGameInfo
+            x0, player_role, x2, x3, x4, *_ = staticGameInfo
             if len(gameState) >= 3:
                 gameTick, x1, shipsAndCommands, *_ = gameState
                 for ship_and_command in shipsAndCommands:
