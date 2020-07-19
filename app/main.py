@@ -1,6 +1,7 @@
 import requests
 import sys
 from interpreter import *
+import time
 
 CREATE = 1
 JOIN = 2
@@ -12,7 +13,12 @@ ACCELERATE = 0
 DETONATE = 1
 SHOOT = 2
 
+# role
+ATTACK = 0
+DEFENCE = 0
+
 API_POINT = '/aliens/send'
+PREV_TIME = time.time()
 
 
 class Ship:
@@ -43,6 +49,7 @@ class Ship:
 
 
 def send(base_url, data) -> list:
+    global PREV_TIME
     url = base_url + API_POINT
     print(url, data)
 
@@ -57,8 +64,11 @@ def send(base_url, data) -> list:
         print('Server response:', res.text)
 
     dem = Demodulate([[int(c) for c in res.text]])
+    current = time.time()
+    print('elapsed:', current - PREV_TIME, '[ms]')
+    PREV_TIME = current
     res: list = dem()
-    print(res)
+    print('Demodulated response', res)
     return res
 
 
