@@ -51,12 +51,54 @@ def makeStartRequest(player_key, gameResponse):
     return ''.join([str(c) for c in req()])
 
 
+class Ship:
+    def __init__(self, ship_id, position, velocity, x4, x5, x6, x7):
+        self.ship_id = ship_id
+        self.position = position
+        self.velocity = velocity
+        self.x4 = x4
+        self.x5 = x5
+        self.x6 = x6
+        self.x7 = x7
+
+    def get_accelarate_vec(self):
+        if abs(self.position[0]) > abs(self.position[1]):
+            if self.position[0] > 0:
+                return [-1, 0]
+            else:
+                return [1, 0]
+        else:
+            if self.position[1] > 0:
+                return [0, -1]
+            else:
+                return [0, 1]
+
+
 def makeCommandsRequest(player_key, gameResponse):
     print('makeCommandsRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
-    commands = []
+    my_ship = get_my_ship(gameResponse)
+    print('my_pos:', my_pos)
+    commands = [[ACCELERATE, my_ship.ship_id, my_ship.get_accelarate_vec()]]
+
     req = Modulate([[COMMANDS, int(player_key), commands]])
     return ''.join([str(c) for c in req()])
+
+
+# def parse_game_response(gameResponse):
+
+
+def get_my_ship(gameResponse) -> Ship:
+    # [flag, gameStage, [x0, player_role, x2, x3, x4], [gameTick, x1, shipsAndCommands]]
+    flag, gameStage, staticGameInfo, gameState, *_ = gameResponse,
+    x0, player_role, x2, x3, x4, *_ = staticGameInfo[0], staticGameInfo
+
+    gameTick, x1, shipsAndCommands, *_ = gameState
+    for ship_and_command in shipsAndCommands:
+        ship, appliedCommands, *_ = ship_and_command
+        role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
+        if role == player_role:
+            return Ship(shipId, position, velocity, x4, x5, x6, x7)
 
 
 def main():
@@ -80,7 +122,6 @@ def main():
     while True:
         # make valid COMMANDS request using the provided player_key and gameResponse returned from START or previous COMMANDS
         commandsRequest = makeCommandsRequest(player_key, gameResponse)
-
         # send it to aliens and get the updated GameResponse
         gameResponse = send(server_url, commandsRequest)
         if gameResponse == [0]:

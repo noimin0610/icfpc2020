@@ -265,8 +265,10 @@ class Demodulate(Node):
         return self.demodulate(self.argv[0])
     
     def demodulate(self, a):
-        if a[:2] == [0, 1] or a[:2] == [1, 0]:
-            return self.demodulate_number(a) 
+        if a[:2] == [0, 0]:
+            return None
+        elif a[:2] == [0, 1] or a[:2] == [1, 0]:
+            return self.demodulate_number(a)
 
         ret = []
         self.i += 2 # 最初の [1, 1] を読み飛ばす
@@ -276,7 +278,8 @@ class Demodulate(Node):
             elif a[self.i:self.i+2] == [0, 1] or a[self.i:self.i+2] == [1, 0]:
                 ret.append(self.demodulate_number(a))
             else:
-                assert False, "Unreachable"
+                ret.append(None)
+                self.i += 2
 
             if a[self.i:self.i+2] == [0, 0]:
                 self.i += 2
