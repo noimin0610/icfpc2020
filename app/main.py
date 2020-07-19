@@ -15,7 +15,7 @@ SHOOT = 2
 API_POINT = '/aliens/send'
 
 
-def send(base_url, data):
+def send(base_url, data) -> list:
     url = base_url + API_POINT
     print(url, data)
 
@@ -29,13 +29,20 @@ def send(base_url, data):
     else:
         print('Server response:', res.text)
 
+    dem = Demodulate([[int(c) for c in res.text]])
+    res: list = dem()
+    print(res)
+    return res
+
 
 def makeJoinRequest(player_key: str) -> str:
+    print('makeJoinRequest')
     req = Modulate([[JOIN, int(player_key), []]])
     return ''.join([str(c) for c in req()])
 
 
 def makeStartRequest(player_key, gameResponse):
+    print('makeStartRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#start
     xs = [1, 2, 3, 4]  # initial ship parameters
     assert xs[3] != 0
@@ -45,6 +52,7 @@ def makeStartRequest(player_key, gameResponse):
 
 
 def makeCommandsRequest(player_key, gameResponse):
+    print('makeCommandsRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
     commands = []
     req = Modulate([[COMMANDS, int(player_key), commands]])
@@ -75,6 +83,8 @@ def main():
 
         # send it to aliens and get the updated GameResponse
         gameResponse = send(server_url, commandsRequest)
+        if gameResponse == [0]:
+            exit()
 
 
 if __name__ == '__main__':
