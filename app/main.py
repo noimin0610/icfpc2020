@@ -62,24 +62,24 @@ def send(base_url, data) -> list:
         print('Response body:', res.text)
     else:
         print('Server response:', res.text)
-
-    dem = Demodulate([[int(c) for c in res.text]])
     current = time.time()
     print('elapsed:', current - PREV_TIME, '[ms]')
+
+    dem = Demodulate([[int(c) for c in res.text]])
     PREV_TIME = current
     res: list = dem()
-    print('Demodulated response', res)
+    print('\tDemodulated response', res)
     return res
 
 
 def makeJoinRequest(player_key: str) -> str:
-    print('makeJoinRequest')
+    print('======== makeJoinRequest ========')
     req = Modulate([[JOIN, int(player_key), []]])()
     return ''.join([str(c) for c in req])
 
 
 def makeStartRequest(player_key, gameResponse):
-    print('makeStartRequest')
+    print('======== makeStartRequest ========')
     # https://message-from-space.readthedocs.io/en/latest/game.html#start
     xs = [256, 1, 1, 1]  # initial ship parameters
     assert xs[3] != 0
@@ -89,7 +89,7 @@ def makeStartRequest(player_key, gameResponse):
 
 
 def makeCommandsRequest(player_key, gameResponse):
-    print('makeCommandsRequest')
+    print('======== makeCommandsRequest ========')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
     commands = []
     # try:
@@ -101,9 +101,9 @@ def makeCommandsRequest(player_key, gameResponse):
     # except ValueError as e:
     #     print(e)
     data = [COMMANDS, int(player_key), commands]
-    print('data:', data)
+    print('\tdata:', data)
     req = Modulate([data])()
-    print('req:', req)
+    print('\treq:', req)
     return ''.join([str(c) for c in req])
 
 
