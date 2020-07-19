@@ -95,10 +95,10 @@ def makeCommandsRequest(player_key, gameResponse):
     try:
         my_ship = get_my_ship(gameResponse)
         print('my_ship:', my_ship)
-        if my_ship is not None:
-            accelerate_command = [
-                ACCELERATE, my_ship.ship_id, my_ship.get_accelarate_vec()]
-            commands.append(accelerate_command)
+        # if my_ship is not None:
+        #     accelerate_command = [
+        #         ACCELERATE, my_ship.ship_id, my_ship.get_accelarate_vec()]
+        #     commands.append(accelerate_command)
 
     except ValueError as e:
         print(e)
