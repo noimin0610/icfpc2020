@@ -100,11 +100,11 @@ def makeCommandsRequest(player_key, gameResponse):
 
 def get_my_ship(gameResponse) -> Ship:
     # [flag, gameStage, [x0, player_role, x2, x3, x4], [gameTick, x1, shipsAndCommands]]
-    if len(gameResponse) >= 4:
+    if gameResponse is not None and len(gameResponse) >= 4:
         flag, gameStage, staticGameInfo, gameState, *_ = gameResponse
-        if len(staticGameInfo) >= 5:
+        if staticGameInfo is not None and len(staticGameInfo) >= 5:
             x0, player_role, x2, x3, x4, *_ = staticGameInfo
-            if len(gameState) >= 3:
+            if gameState is not None and len(gameState) >= 3:
                 gameTick, x1, shipsAndCommands, *_ = gameState
                 for ship_and_command in shipsAndCommands:
                     ship, appliedCommands, *_ = ship_and_command
