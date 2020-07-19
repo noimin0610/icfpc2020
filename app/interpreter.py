@@ -681,30 +681,6 @@ class Draw(Node):
             pic.add_dot(dot[0], dot[1])
         return pic
 
-class ParenOpen(Node):
-    def __init__(self, argv=None):
-        self.argc = 0
-        self.argv = []
-
-    def __call__(self):
-        return self
-
-class ParenClose(Node):
-    def __init__(self, argv=None):
-        self.argc = 0
-        self.argv = []
-
-    def __call__(self):
-        return self
-
-class Comma(Node):
-    def __init__(self, argv=None):
-        self.argc = 0
-        self.argv = []
-
-    def __call__(self):
-        return self
-
 class Program:
     def __init__(self, nodes):
         self.nodes = nodes
