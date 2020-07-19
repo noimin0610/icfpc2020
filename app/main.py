@@ -15,42 +15,6 @@ SHOOT = 2
 API_POINT = '/aliens/send'
 
 
-def send(base_url, data) -> list:
-    url = base_url + API_POINT
-    print(url, data)
-
-    res = requests.post(url, data=data)
-    if res.status_code == 302:
-        print('HTTP code:', res.status_code)
-    elif res.status_code != 200:
-        print('Unexpected server response:')
-        print('HTTP code:', res.status_code)
-        print('Response body:', res.text)
-    else:
-        print('Server response:', res.text)
-
-    dem = Demodulate([[int(c) for c in res.text]])
-    res: list = dem()
-    print(res)
-    return res
-
-
-def makeJoinRequest(player_key: str) -> str:
-    print('makeJoinRequest')
-    req = Modulate([[JOIN, int(player_key), []]])
-    return ''.join([str(c) for c in req()])
-
-
-def makeStartRequest(player_key, gameResponse):
-    print('makeStartRequest')
-    # https://message-from-space.readthedocs.io/en/latest/game.html#start
-    xs = [256, 1, 1, 1]  # initial ship parameters
-    assert xs[3] != 0
-
-    req = Modulate([[START, int(player_key), xs]])
-    return ''.join([str(c) for c in req()])
-
-
 class Ship:
     def __init__(self, ship_id, position, velocity, x4, x5, x6, x7):
         self.ship_id = ship_id
@@ -78,6 +42,42 @@ class Ship:
                 return [0, 1]
 
 
+def send(base_url, data) -> list:
+    url = base_url + API_POINT
+    print(url, data)
+
+    res = requests.post(url, data=data)
+    if res.status_code == 302:
+        print('HTTP code:', res.status_code)
+    elif res.status_code != 200:
+        print('Unexpected server response:')
+        print('HTTP code:', res.status_code)
+        print('Response body:', res.text)
+    else:
+        print('Server response:', res.text)
+
+    dem = Demodulate([[int(c) for c in res.text]])
+    res: list = dem()
+    print(res)
+    return res
+
+
+def makeJoinRequest(player_key: str) -> str:
+    print('makeJoinRequest')
+    req = Modulate([[JOIN, int(player_key), []]])()
+    return ''.join([str(c) for c in req])
+
+
+def makeStartRequest(player_key, gameResponse):
+    print('makeStartRequest')
+    # https://message-from-space.readthedocs.io/en/latest/game.html#start
+    xs = [256, 1, 1, 1]  # initial ship parameters
+    assert xs[3] != 0
+
+    req = Modulate([[START, int(player_key), xs]])()
+    return ''.join([str(c) for c in req])
+
+
 def makeCommandsRequest(player_key, gameResponse):
     print('makeCommandsRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
@@ -90,9 +90,11 @@ def makeCommandsRequest(player_key, gameResponse):
                          my_ship.get_accelarate_vec()]]
     except ValueError as e:
         print(e)
-
-    req = Modulate([[COMMANDS, int(player_key), commands]])
-    return ''.join([str(c) for c in req()])
+    data = [COMMANDS, int(player_key), commands]
+    print('data:', data)
+    req = Modulate([data])()
+    print('req:', req)
+    return ''.join([str(c) for c in req])
 
 
 # def parse_game_response(gameResponse):
