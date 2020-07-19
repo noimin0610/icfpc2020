@@ -244,6 +244,7 @@ class Demodulate(Node):
             v *= -1
         return v
 
+
 class Modem(Node):
     def __init__(self, argv=None):
         self.argc = 1
@@ -253,53 +254,59 @@ class Modem(Node):
             self.argv = []
 
     def __call__(self):
-        return Demodulate(Modulate(self.argv[0]))
-
-# class Modem(Node):
-#     def __init__(self, argv=None):
-#         self.argc = 1
-#         if argv:
-#             self.argv = argv[:]
-#         else:
-#             self.argv = []
-
-#     def __call__(self):
-#         # ap modem x0 = ap dem ap mod x0 = dem(mod(x0))
-#         if len(self.argv) < self.argc:
-#             return self
-#         if isinstance(self.argv[0], Variable):
-#             return Variable()
-#         return Demodulate([Modulate.modulate(self.argv[0])])()
+        # ap modem x0 = ap dem ap mod x0 = dem(mod(x0))
+        if len(self.argv) < self.argc:
+            return self
+        if isinstance(self.argv[0], Variable):
+            return Variable()
+        return Demodulate([Modulate.modulate(self.argv[0])])()
 
 
 # class F38(Node):
 #     def __init__(self, argv=None):
-#         self.argc = 1
+#         self.argc = 2 # protorol, protorol(state, vector)
 #         if argv:
 #             self.argv = argv[:]
 #         else:
 #             self.argv = []
-
+#
 #     def __call__(self):
 #         if len(self.argv) < self.argc:
 #             return self
 #         if isinstance(self.argv[0], Variable):
 #             return Variable()
-
-
+#         flag, newstate, data = argv[1]
+#         if flag == 0:
+#             return [Modem(newstate), Multipledraw(data)]
+#         else:
+#             return Interact(Modem(newstate), Send(data))
+#
 # class Interact(Node):
+#     def __init__(self, argv=None):
+#         self.argc = 2 # state, event
+#         if argv:
+#             self.argv = argv[:]
+#         else:
+#             self.argv = []
+#
+#     def __call__(self):
+#         if len(self.argv) < self.argc:
+#             return self
+#         if isinstance(self.argv[0], Variable):
+#             return Variable()
+#         return F38('galaxy', 'protocol(state, vector)')
+
+
+# class Send(Node):
 #     def __init__(self, argv=None):
 #         self.argc = 1
 #         if argv:
 #             self.argv = argv[:]
 #         else:
 #             self.argv = []
-
+#
 #     def __call__(self):
-#         if len(self.argv) < self.argc:
-#             return self
-#         if isinstance(self.argv[0], Variable):
-#             return Variable()
+#         return self #TODO ?????
 
 class Neg(Node):
     def __init__(self, argv=None):
