@@ -96,10 +96,6 @@ class Dot:
 
 
 def draw(raw_dots: Expr) -> Expr:
-    """
-    Args:
-        dots: List<Vect>>
-    """
     maxx = maxy = 0
     minx = miny = 0
     dots = []
@@ -114,6 +110,7 @@ def draw(raw_dots: Expr) -> Expr:
     pic = [[' ']*w for _ in range(h)]
     for dot in dots:
         pic[dot.y-miny][dot.x-minx] = '.'
+    print('(y={}, x={})'.format(minx, miny))
     for row in pic:
         print(''.join(row))
 
