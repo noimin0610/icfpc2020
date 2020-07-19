@@ -121,6 +121,8 @@ def try_eval(expr: Expr, indent='') -> Expr:
                 return Ap(x, t)
             if fun.name == 'cdr':
                 return Ap(x, f)
+            if fun.name == 'modem':
+                return Ap(x, f)
         if isinstance(fun, Ap):
             #print(indent+'>>>>> fun is Ap')
             fun2: Expr = eval(fun.fun, indent+'    ')
@@ -207,7 +209,7 @@ def parse_functions(lines: List[str]) -> Dict[str, Expr]:
 def main():
     # See https://message-from-space.readthedocs.io/en/latest/message39.html
     global FUNCTIONS
-    with open(sys.argv[1]) as galaxy:
+    with open('./galaxy.txt') as galaxy:
         FUNCTIONS = parse_functions(galaxy.readlines())
     with open('functions.tsv', 'w') as fout:
         for k, v in sorted(FUNCTIONS.items(), key=lambda x: x[0]):
@@ -216,10 +218,11 @@ def main():
     state: Expr = nil
     vector: Vect = Vect(0, 0)
     click = Ap(Ap(cons, Atom(vector.x)), Atom(vector.y))
+    # ap ap ap interact galaxy state click
     expr: Expr = Ap(Ap(Atom('galaxy'), state), click)
 
+    # # repl
     # while True:
-    #     # repl
     #     print('> ', end='')
     #     tokens = input().split()
     #     try:
@@ -228,17 +231,17 @@ def main():
     #         print(eval(expr))
     #     except TypeError as e:
     #         print(e)
+
     print('##### interact expr #####', expr, sep='\n')
     res: Expr = eval(expr)
     print('##### interact res #####', res, sep='\n')
     while True:
         click: Expr = Ap(Ap(cons, Atom(vector.x)), Atom(vector.y))
-        # print(click)
         (new_state, images) = interact(state, click)
         exit()
-        # print_IMAGES(images)
-        vector = REQUEST_CLICK_FROM_USER()
-        state = new_state
+        # PRINT_IMAGES(images)
+        # vector = REQUEST_CLICK_FROM_USER()
+        # state = new_state
 
 
 if __name__ == '__main__':
