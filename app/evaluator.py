@@ -59,8 +59,15 @@ def SEND_TO_ALIEN_PROXY(data):
 
 
 def GET_LIST_ITEMS_FROM_EXPR(res):
-    return [Atom(0), AtomList([Atom(1)]), Atom(1)]
-
+    return [Atom(0), AtomList([Atom(1)]),
+        [[
+            Vect(1,1), Vect(2,2), Vect(3,3)
+        ], [
+            Vect(10,5), Vect(9,6), Vect(8,7)
+        ], [
+            Vect(0,0)
+        ]]
+    ]
 
 def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
     # See https://message-from-space.readthedocs.io/en/latest/message38.html
@@ -75,8 +82,34 @@ def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
     return interact(new_state, SEND_TO_ALIEN_PROXY(data))
 
 
-def multipledraw(data: Expr) -> Expr: # List[List[Vect]]
-    return data #TODO stub
+def draw(dots: List) -> Expr:
+    """
+    Args:
+        dots: List<Vect>>
+    """
+    maxx = maxy = 0
+    for dot in dots:
+        maxx = max(maxx, dot.x)
+        maxy = max(maxy, dot.y)
+    w,h = maxx+5, maxy+5
+    pic = [[' ']*w for _ in range(h)]
+    for dot in dots:
+        pic[dot.y][dot.x] = '.'
+    for row in pic:
+        print(''.join(row))
+
+
+def multipledraw(data: List) -> Expr:
+    """
+    Args:
+        data: List<List<Vect>>>
+    """
+    if data == nil: return nil
+    print('-' * 60)
+    for dots in data:
+        draw(dots)
+        print('-' * 60)
+    return data
 
 
 def eval(expr: Expr, indent='') -> Expr:
