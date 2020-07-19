@@ -44,7 +44,7 @@ def makeJoinRequest(player_key: str) -> str:
 def makeStartRequest(player_key, gameResponse):
     print('makeStartRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#start
-    xs = [1, 2, 3, 4]  # initial ship parameters
+    xs = [256, 1, 1, 1]  # initial ship parameters
     assert xs[3] != 0
 
     req = Modulate([[START, int(player_key), xs]])
@@ -85,8 +85,9 @@ def makeCommandsRequest(player_key, gameResponse):
     try:
         my_ship = get_my_ship(gameResponse)
         print('my_ship:', my_ship)
-        commands = [[ACCELERATE, my_ship.ship_id,
-                     my_ship.get_accelarate_vec()]]
+        if my_ship is not None:
+            commands = [[ACCELERATE, my_ship.ship_id,
+                         my_ship.get_accelarate_vec()]]
     except ValueError as e:
         print(e)
 
@@ -99,15 +100,17 @@ def makeCommandsRequest(player_key, gameResponse):
 
 def get_my_ship(gameResponse) -> Ship:
     # [flag, gameStage, [x0, player_role, x2, x3, x4], [gameTick, x1, shipsAndCommands]]
-    flag, gameStage, staticGameInfo, gameState, *_ = gameResponse,
-    x0, player_role, x2, x3, x4, *_ = staticGameInfo[0], staticGameInfo
-
-    gameTick, x1, shipsAndCommands, *_ = gameState
-    for ship_and_command in shipsAndCommands:
-        ship, appliedCommands, *_ = ship_and_command
-        role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
-        if role == player_role:
-            return Ship(shipId, position, velocity, x4, x5, x6, x7)
+    if len(gameResponse) >= 4:
+        flag, gameStage, staticGameInfo, gameState, *_ = gameResponse
+        if len(staticGameInfo) >= 5:
+            x0, player_role, x2, x3, x4, *_ = staticGameInfo[0], staticGameInfo
+            if len(gameState) >= 3:
+                gameTick, x1, shipsAndCommands, *_ = gameState
+                for ship_and_command in shipsAndCommands:
+                    ship, appliedCommands, *_ = ship_and_command
+                    role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
+                    if role == player_role:
+                        return Ship(shipId, position, velocity, x4, x5, x6, x7)
 
 
 def main():
