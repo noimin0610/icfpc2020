@@ -210,6 +210,13 @@ class TestDemodulate(unittest.TestCase):
             [[1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]])
         self.assertEqual(dem(), -256, str(dem))
 
+    def test_demodulate_list(self):
+        dem = Demodulate([[
+                         1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0]])
+        self.assertEqual(dem(), [1, 2], str(dem))
+        dem = Demodulate([[1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0,
+            1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0]])
+        self.assertEqual(dem(), [1, [2, 3], 4], str(dem))
 
 class TestNeg(unittest.TestCase):
     def test_simple(self):

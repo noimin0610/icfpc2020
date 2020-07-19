@@ -258,35 +258,51 @@ class Demodulate(Node):
         self.i = 0
 
     def __call__(self):
-        a = self.argv[0]
-        return Demodulate.demodulate(a)
+        return self.demodulate(self.argv[0])
     
     def demodulate(self, a):
-        if a[i:i+2] == [1, 1]:
-            return Demodulate.demodulate_list(a)
-        elif a[i:i+2] == [0, 1] or a[i:i+2] == [1, 0]:
-            return Demodulate.demodulate_number(a)
-        else:
-            assert False, "Unreachable"
+        if a[:2] == [0, 1] or a[:2] == [1, 0]:
+            return self.demodulate_number(a) 
+
+        ret = []
+        self.i += 2 # 最初の [1, 1] を読み飛ばす
+        while self.i < len(a):
+            if a[self.i:self.i+2] == [1, 1]:
+                ret.append(self.demodulate(a))
+            elif a[self.i:self.i+2] == [0, 1] or a[self.i:self.i+2] == [1, 0]:
+                ret.append(self.demodulate_number(a))
+            else:
+                assert False, "Unreachable"
+
+            if a[self.i:self.i+2] == [0, 0]:
+                self.i += 2
+                break
+            elif a[self.i:self.i+2] == [1, 1]:
+                self.i += 2
+        return ret
     
     def demodulate_number(self, a):
         if a == [0, 1, 0]:
             return 0
-        neg = a[:2] == [1, 0]
-        i = 2
-        while a[i] == 1:
-            i += 1
+        neg = a[self.i:self.i+2] == [1, 0]
+        self.i += 2
+        digit_num = 0
+        while a[self.i] == 1:
+            self.i += 1
+            digit_num += 4
         v = 0
         k = 1
-        for b in reversed(a[i+1:]):
+        for b in reversed(a[self.i+1:self.i+1+digit_num]):
             v += k*b
             k *= 2
         if neg:
             v *= -1
+        self.i += 1 + digit_num
         return v
 
     def demodulate_list(self, a):
         pass
+        
 
 
 class Modem(Node):
