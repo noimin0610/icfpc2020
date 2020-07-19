@@ -239,7 +239,8 @@ class Modulate(Node):
         return ret
 
     def modulate_list(v):
-
+        if not v:
+            return [0, 0]
         ret = []
         for e in v:
             ret.extend([1, 1])
