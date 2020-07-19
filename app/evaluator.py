@@ -1,3 +1,4 @@
+import interpreter
 import sys
 from typing import Optional, Dict, Tuple, List
 sys.setrecursionlimit(200000)
@@ -29,19 +30,23 @@ class Ap(Expr):
     def __str__(self) -> str:
         return 'Ap({},{})'.format(str(self.fun), str(self.arg))
 
+    def display(self) -> str:
+        ret = ['ap']
+        if isinstance(self.fun, Ap):
+            ret.append(self.fun.display())
+        elif isinstance(self.fun, Atom):
+            ret.append(str(self.fun.name))
+        if isinstance(self.arg, Ap):
+            ret.append(self.arg.display())
+        elif isinstance(self.arg, Atom):
+            ret.append(str(self.arg.name))
+        return ' '.join(ret)
+
 
 class Vect:
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
-
-
-class AtomList:
-    def __init__(self, lst):
-        self.list = lst
-
-    def __str__(self):
-        return '[{}]'.format(','.join(str(atom) for atom in self.list))
 
 
 cons = Atom('cons')
@@ -52,22 +57,23 @@ nil = Atom('nil')
 FUNCTIONS: Dict[str, Expr] = dict()
 
 
+def PRINT_IMAGES(images: Expr):
+    print(images)
+
+
 def SEND_TO_ALIEN_PROXY(data):
 
-    return [Atom(0)]
+    # return [Atom(0)]
     return [Atom(1), Atom(67425)]
 
 
-def GET_LIST_ITEMS_FROM_EXPR(res):
-    return [Atom(0), AtomList([Atom(1)]),
-        [[
-            Vect(1,1), Vect(2,2), Vect(3,3)
-        ], [
-            Vect(10,5), Vect(9,6), Vect(8,7)
-        ], [
-            Vect(0,0)
-        ]]
-    ]
+def get_list_items_from_expr(res) -> Tuple[int, Expr, Expr]:
+    flag = res.fun.arg
+    new_state = res.arg.fun.arg
+    data = res.arg.arg
+
+    return [flag, new_state, data]
+
 
 def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
     # See https://message-from-space.readthedocs.io/en/latest/message38.html
@@ -75,26 +81,39 @@ def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
     # print('##### interact expr #####', expr, sep='\n')
     res: Expr = eval(expr)
     # print('##### interact res #####', res, sep='\n')
+
     # Note: res will be modulatable here(consists of cons, nil and numbers only)
-    flag, new_state, data = GET_LIST_ITEMS_FROM_EXPR(res)
+    flag, new_state, data = get_list_items_from_expr(res)
     if as_num(flag) == 0:
         return (new_state, multipledraw(data))
     return interact(new_state, SEND_TO_ALIEN_PROXY(data))
 
 
-def draw(dots: List) -> Expr:
+class Dot:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+def draw(raw_dots: Expr) -> Expr:
     """
     Args:
         dots: List<Vect>>
     """
     maxx = maxy = 0
-    for dot in dots:
+    minx = miny = 0
+    dots = []
+    for d in raw_dots:
+        dot = Dot(d[0], d[1])
         maxx = max(maxx, dot.x)
         maxy = max(maxy, dot.y)
-    w,h = maxx+5, maxy+5
+        minx = min(minx, dot.x)
+        miny = min(miny, dot.y)
+        dots.append(dot)
+    w, h = maxx-minx+5, maxy-miny+5
     pic = [[' ']*w for _ in range(h)]
     for dot in dots:
-        pic[dot.y][dot.x] = '.'
+        pic[dot.y-miny][dot.x-minx] = '.'
     for row in pic:
         print(''.join(row))
 
@@ -104,22 +123,27 @@ def multipledraw(data: List) -> Expr:
     Args:
         data: List<List<Vect>>>
     """
-    if data == nil: return nil
+    if data == nil:
+        return nil
+
+    data_list_form = interpreter.execute(data.display())
+    print(data_list_form)
+
     print('-' * 60)
-    for dots in data:
+    for dots in data_list_form[0]:
         draw(dots)
         print('-' * 60)
     return data
 
 
-def eval(expr: Expr, indent='') -> Expr:
+def eval(expr: Expr) -> Expr:
     #print(indent+'===== eval expr =====', indent + str(expr), sep='\n')
     if expr.evaluated is not None:
         #print(indent+'-> evaluated', expr)
         return expr.evaluated
     initial: Expr = expr
     while True:
-        result: Expr = try_eval(expr, indent+'    ')
+        result: Expr = try_eval(expr)
         #print(indent+'-> result', result)
         if result == expr:
             initial.evaluated = result
@@ -128,7 +152,7 @@ def eval(expr: Expr, indent='') -> Expr:
         expr = result
 
 
-def try_eval(expr: Expr, indent='') -> Expr:
+def try_eval(expr: Expr) -> Expr:
     #print(indent+'===== try_eval expr =====', indent + str(expr), sep='\n')
     if expr.evaluated is not None:
         #print(indent+'-> evaluated', expr)
@@ -137,17 +161,17 @@ def try_eval(expr: Expr, indent='') -> Expr:
         return FUNCTIONS.get(expr.name)
     if isinstance(expr, Ap):
         #print(indent+'expr is Ap')
-        fun: Expr = eval(expr.fun, indent+'    ')
+        fun: Expr = eval(expr.fun)
         expr.fun = fun
         #print(indent + 'fun:' + str(fun))
         x: Expr = expr.arg
         if isinstance(fun, Atom):
             if fun.name == 'neg':
-                return Atom(-as_num(eval(x, indent+'    ')))
+                return Atom(-as_num(eval(x)))
             if fun.name == 'inc':
-                return Atom(as_num(eval(x, indent+'    '))+1)
+                return Atom(as_num(eval(x))+1)
             if fun.name == 'dec':
-                return Atom(as_num(eval(x, indent+'    '))-1)
+                return Atom(as_num(eval(x))-1)
             if fun.name == 'i':
                 return x
             if fun.name == 'nil':
@@ -162,7 +186,7 @@ def try_eval(expr: Expr, indent='') -> Expr:
                 return Ap(x, f)
         if isinstance(fun, Ap):
             #print(indent+'>>>>> fun is Ap')
-            fun2: Expr = eval(fun.fun, indent+'    ')
+            fun2: Expr = eval(fun.fun)
             expr.fun.fun = fun2
             #print(indent + 'fun2:' + str(fun2))
             y: Expr = fun.arg
@@ -172,19 +196,19 @@ def try_eval(expr: Expr, indent='') -> Expr:
                 if fun2.name == 'f':
                     return x
                 if fun2.name == 'add':
-                    return Atom(as_num(eval(x, indent+'    ')) + as_num(eval(y, indent+'    ')))
+                    return Atom(as_num(eval(x)) + as_num(eval(y)))
                 if fun2.name == 'mul':
-                    return Atom(as_num(eval(x, indent+'    ')) * as_num(eval(y, indent+'    ')))
+                    return Atom(as_num(eval(x)) * as_num(eval(y)))
                 if fun2.name == 'div':
-                    return Atom(as_num(eval(y, indent+'    ')) // as_num(eval(x, indent+'    ')))
+                    return Atom(as_num(eval(y)) // as_num(eval(x)))
                 if fun2.name == 'lt':
-                    return t if as_num(eval(y, indent+'    ')) < as_num(eval(x, indent+'    ')) else f
+                    return t if as_num(eval(y)) < as_num(eval(x)) else f
                 if fun2.name == 'eq':
-                    return t if as_num(eval(x, indent+'    ')) == as_num(eval(y, indent+'    ')) else f
+                    return t if as_num(eval(x)) == as_num(eval(y)) else f
                 if fun2.name == 'cons':
                     return eval_cons(y, x)
             if isinstance(fun2, Ap):
-                fun3: Expr = eval(fun2.fun, indent+'    ')
+                fun3: Expr = eval(fun2.fun)
                 expr.fun.fun.fun = fun3
                 z: Expr = fun2.arg
                 if isinstance(fun3, Atom):
@@ -209,6 +233,7 @@ def eval_cons(a: Expr, b: Expr) -> Expr:
 def as_num(n: Expr) -> int:
     if isinstance(n, Atom):
         return int(n.name)
+    print(n)
     raise ValueError('not a number')
 
 
@@ -216,7 +241,7 @@ def parse_formula(tokens: List[str]) -> Expr:
     def dfs(index: int) -> Tuple[int, Expr]:
         if index >= len(tokens):
             # incomipeted ap formula
-            return None
+            raise ValueError
         if tokens[index] == 'ap':
             used_index, fun = dfs(index+1)
             used_index, arg = dfs(used_index+1)
@@ -241,6 +266,12 @@ def parse_functions(lines: List[str]) -> Dict[str, Expr]:
         # print(expr)
         functions[function_name] = expr
     return functions
+
+
+def REQUEST_CLICK_FROM_USER() -> Vect:
+    print('input x y > ', end='')
+    x, y = map(int, input().split())
+    return Vect(x, y)
 
 
 def main():
@@ -275,10 +306,9 @@ def main():
     while True:
         click: Expr = Ap(Ap(cons, Atom(vector.x)), Atom(vector.y))
         (new_state, images) = interact(state, click)
-        exit()
-        # PRINT_IMAGES(images)
-        # vector = REQUEST_CLICK_FROM_USER()
-        # state = new_state
+        PRINT_IMAGES(images)
+        vector = REQUEST_CLICK_FROM_USER()
+        state = new_state
 
 
 if __name__ == '__main__':

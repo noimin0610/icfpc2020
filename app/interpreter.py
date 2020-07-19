@@ -841,6 +841,10 @@ def parse(tokens):
 def lex(s):
     return s.split()
 
+def execute(source:str)->list:
+    tokens = lex(source)
+    program = parse(tokens)
+    return program.eval()
 
 def main():
     # example input: ap ap add -2 ap neg 7
