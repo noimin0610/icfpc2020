@@ -19,10 +19,12 @@ def list_to_tokens(lis):
     for item in lis:
         tokens += ['ap', 'ap', 'cons', str(item)]
     tokens.append('nil')
+    return tokens
 
 def main(lines, root="galaxy"):
     result = {}
     has_uncalculated = True
+    loop_count = 0
     print(f"all eqs: {len(lines)}")
     
     while has_uncalculated:
@@ -41,17 +43,19 @@ def main(lines, root="galaxy"):
             for idx, token in enumerate(tokens[2:], start=2):
                 if token in result:
                     if type(result[token]) == list:
-                        new_tokens.append(list_to_tokens(result[token]))
+                        new_tokens += list_to_tokens(result[token])
                     else:
                         new_tokens.append(result[token])
                 else:
                     new_tokens.append(token)
-            token = new_tokens
+            tokens = [str(new_token) for new_token in new_tokens]
             lines[row_number] = " ".join(tokens)
+            if 190 <= row_number and row_number <= 200:
+                print(lines[row_number])
 
             # トークン列の書き換えがあった場合はトークン列を出力
             # if new_tokens != token:
-            #     print(f"tokens: {tokens}", file=sys.stderr)
+                # print(f"tokens: {tokens}", file=sys.stderr)
 
             program = None
             try:
@@ -63,17 +67,24 @@ def main(lines, root="galaxy"):
             # print(f"program: {program}", file=sys.stderr)
             try:
                 res = program.eval()
+
                 # 結果に Variable が含まれる場合は計算未完了とみなす
+                # 結果が関数的なものだった場合は元々のトークン列を result に登録する
                 if "Variable" in str(res):
                     has_uncalculated = True
+                elif type(res) not in (int, list):
+                    result[var] = tokens[2:]
                 else:
                     result[var] = res
                 display = '{} = {} = {}'.format(
                     tokens[0], res, tokens[2:])
                 # print(display, file=sys.stderr)
+            except IndexError:
+                result[var] = tokens[2:]
             except EOFError:
                 pass
-    
+        loop_count += 1
+        
     return result[root]
 
 if __name__ == "__main__":

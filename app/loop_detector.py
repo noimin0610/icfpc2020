@@ -11,7 +11,7 @@ class Detector:
     def get_dependencies(self):
         # 変数間の依存関係の隣接リスト
         # value の変数を計算しないと key の式は計算できない
-        dependencies = defaultdict(set)\
+        dependencies = defaultdict(set)
 
         # 変数間の依存関係を dependencies に入れる
         for eq in self.eqs:
@@ -32,7 +32,6 @@ class Detector:
         print(loop_node)
 
     def dfs(self, node, hist):
-        self.used[node] = True;
         hist.append(node)
         for nxt in self.dependencies[node]:
             if nxt in hist:
