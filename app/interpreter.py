@@ -662,7 +662,7 @@ class Picture:
 class Draw(Node):
     """
     Args:
-        argv[0]: List<List<(int, int)>>
+        argv[0]: List<Vec<(int, int)>>
     """
 
     def __init__(self, argv=None):
@@ -680,6 +680,27 @@ class Draw(Node):
             dot = dot()
             pic.add_dot(dot[0], dot[1])
         return pic
+
+
+class MultipleDraw(Node):
+    """
+    Args:
+        argv[0]: List<List<Vec<(int, int)>>>
+    """
+
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        if len(self.argv) < self.argc:
+            return self
+        if isinstance(self.argv[0], Nil): return []
+        return [Draw(dots) for dots in self.argv[0]]
+
 
 class Program:
     def __init__(self, nodes):
@@ -784,14 +805,14 @@ def parse(tokens):
             nodes.append(ParenClose())
         elif t == ',':
             nodes.append(Comma())
-        elif t.startswith(':'):
+        elif t.startswith(':') or t.startswith('x'):
             nodes.append(Variable())
         elif t == 'send':
             nodes.append(None)
         # elif t == 'checkerboard':
         #     nodes.append(None)
-        # elif t == 'multipledraw':
-        #     nodes.append(None)
+        elif t == 'multipledraw':
+            nodes.append(MultipleDraw())
         elif t == 'if0':
             nodes.append(If0())
         # elif t == 'modem':
