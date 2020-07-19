@@ -163,7 +163,7 @@ class TestModulate(unittest.TestCase):
 
     def test_modulate_list_program(self):
         program = Program([Ap(), Modulate(), Nil()])
-        self.assertEqual(program.eval(), [1, 1], str(program))
+        self.assertEqual(program.eval(), [0, 0], str(program))
         program = Program([Ap(), Modulate(), Ap(), Ap(), Cons(), Nil(), Nil()])
         self.assertEqual(program.eval(), [1, 1, 0, 0, 0, 0], str(program))
         program = Program([Ap(), Modulate(), Ap(), Ap(), Cons(), 0, Nil()])

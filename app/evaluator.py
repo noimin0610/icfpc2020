@@ -1,7 +1,12 @@
 import interpreter
 import sys
+import requests
 from typing import Optional, Dict, Tuple, List
+from interpreter import Modulate, execute
+
 sys.setrecursionlimit(200000)
+server_url = sys.argv[1]
+player_key = sys.argv[2]
 
 
 class Expr:
@@ -62,6 +67,22 @@ def PRINT_IMAGES(images: Expr):
 
 
 def SEND_TO_ALIEN_PROXY(data):
+    url = server_url + '/aliens/send'
+    print(f"url: {url}")
+    print(f"data: {data}")
+    print(data.display())
+    modulated_data = interpreter.execute("ap mod " + data.display())
+    modulated_data_str = "".join([str(bit) for bit in modulated_data])
+
+    res = requests.post(url, data=modulated_data_str)
+    if res.status_code != 200:
+        print('Unexpected server response:')
+        print('HTTP code:', res.status_code)
+        print('Response body:', res.text)
+        exit(1)
+    
+    print('Server response:', res.text)
+    return res.text
 
     # return [Atom(0)]
     return [Atom(1), Atom(67425)]
@@ -84,8 +105,8 @@ def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
 
     # Note: res will be modulatable here(consists of cons, nil and numbers only)
     flag, new_state, data = get_list_items_from_expr(res)
-    if as_num(flag) == 0:
-        return (new_state, multipledraw(data))
+    # if as_num(flag) == 0:
+    #     return (new_state, multipledraw(data))
     return interact(new_state, SEND_TO_ALIEN_PROXY(data))
 
 

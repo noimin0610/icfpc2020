@@ -188,7 +188,7 @@ class Modulate(Node):
 
     def modulate(v):
         if v == [Nil()]:
-            return [1, 1]
+            return [0, 0]
         if isinstance(v, Nil):
             return Modulate.modulate_nil(v)
         elif isinstance(v, list):
@@ -226,9 +226,21 @@ class Demodulate(Node):
             self.argv = argv[:]
         else:
             self.argv = []
+        self.i = 0
 
     def __call__(self):
         a = self.argv[0]
+        return Demodulate.demodulate(a)
+    
+    def demodulate(self, a):
+        if a[i:i+2] == [1, 1]:
+            return Demodulate.demodulate_list(a)
+        elif a[i:i+2] == [0, 1] or a[i:i+2] == [1, 0]:
+            return Demodulate.demodulate_number(a)
+        else:
+            assert False, "Unreachable"
+    
+    def demodulate_number(self, a):
         if a == [0, 1, 0]:
             return 0
         neg = a[:2] == [1, 0]
@@ -243,6 +255,9 @@ class Demodulate(Node):
         if neg:
             v *= -1
         return v
+
+    def demodulate_list(self, a):
+        pass
 
 
 class Modem(Node):
