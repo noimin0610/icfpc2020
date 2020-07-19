@@ -12,9 +12,22 @@ ACCELERATE = 0
 DETONATE = 1
 SHOOT = 2
 
+API_POINT = '/aliens/send'
 
-def send(a, b):
-    print(a, b)
+
+def send(base_url, data):
+    url = base_url + API_POINT
+    print(url, data)
+
+    res = requests.post(url, data=data)
+    if res.status_code == 302:
+        print('HTTP code:', res.status_code)
+    elif res.status_code != 200:
+        print('Unexpected server response:')
+        print('HTTP code:', res.status_code)
+        print('Response body:', res.text)
+    else:
+        print('Server response:', res.text)
 
 
 def makeJoinRequest(player_key: str) -> str:
