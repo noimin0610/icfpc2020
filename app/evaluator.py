@@ -105,8 +105,8 @@ def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
 
     # Note: res will be modulatable here(consists of cons, nil and numbers only)
     flag, new_state, data = get_list_items_from_expr(res)
-    # if as_num(flag) == 0:
-    #     return (new_state, multipledraw(data))
+    if as_num(flag) == 0:
+        return (new_state, multipledraw(data))
     return interact(new_state, SEND_TO_ALIEN_PROXY(data))
 
 
