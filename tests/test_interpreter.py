@@ -398,11 +398,14 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), Ap(), SCombinator(), Mul(), Ap(), Add(), 1, 6])
         self.assertEqual(program.eval(), 42, str(program))
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable()])
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Add(), Inc(), Variable()])
         self.assertEqual(program.eval(), Variable(), program)
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Add(), Variable(), 1])
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Add(), Variable(), 1])
         self.assertEqual(program.eval(), Variable(), program)
-        program = Program([Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
+        program = Program(
+            [Ap(), Ap(), Ap(), SCombinator(), Variable(), Inc(), 1])
         self.assertEqual(program.eval(), Variable(), program)
 
     def test_modulate_demodulate(self):
@@ -447,6 +450,44 @@ class TestEval(unittest.TestCase):
             [Ap(), Ap(), FalseCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
 
+
+class TestConvert(unittest.TestCase):
+    def test_flat(self):
+        ap_str = 'ap ap cons 1 ap ap cons 2 ap ap cons 3 nil'
+        result = execute(ap_str)
+        expected = [1, 2, 3]
+        self.assertEqual(expected, result)
+        redo = execute(list_to_cons_str(result))
+        self.assertEqual(result, redo)
+
+        expected = list_to_cons_str(result)
+        actual = list_to_cons_str(redo)
+        self.assertEqual(expected, actual)
+
+    def test_nested(self):
+        ap_str = 'ap ap cons 1 ap ap cons ap ap cons 2 ap ap cons 3 nil ap ap cons 4 nil'
+        result = execute(ap_str)
+        expected = [1, [2, 3], 4]
+        self.assertEqual(expected, result)
+        self.assertEqual(ap_str, list_to_cons_str(result))
+        redo = execute(list_to_cons_str(result))
+
+        redo = execute(list_to_cons_str(result))
+        self.assertEqual(result, redo)
+
+        expected = list_to_cons_str(result)
+        actual = list_to_cons_str(redo)
+        self.assertEqual(expected, actual)
+
+    def test_simple(self):
+        ap_str = 'ap ap cons 0 ap ap cons ap ap cons 0 ap ap cons ap ap cons 0 nil ap ap cons 0 ap ap cons nil nil ap ap cons ap ap cons ap ap cons ap ap cons -1 -3 ap ap cons ap ap cons 0 -3 ap ap cons ap ap cons 1 -3 ap ap cons ap ap cons 2 -2 ap ap cons ap ap cons -2 -1 ap ap cons ap ap cons -1 -1 ap ap cons ap ap cons 0 -1 ap ap cons ap ap cons 3 -1 ap ap cons ap ap cons -3 0 ap ap cons ap ap cons -1 0 ap ap cons ap ap cons 1 0 ap ap cons ap ap cons 3 0 ap ap cons ap ap cons -3 1 ap ap cons ap ap cons 0 1 ap ap cons ap ap cons 1 1 ap ap cons ap ap cons 2 1 ap ap cons ap ap cons -2 2 ap ap cons ap ap cons -1 3 ap ap cons ap ap cons 0 3 ap ap cons ap ap cons 1 3 nil ap ap cons ap ap cons ap ap cons -7 -3 ap ap cons ap ap cons -8 -2 nil ap ap cons nil nil nil'
+        result = execute(ap_str)
+        redo = execute(list_to_cons_str(result))
+        self.assertEqual(result, redo)
+
+        expected = list_to_cons_str(result)
+        actual = list_to_cons_str(redo)
+        self.assertEqual(expected, actual)
 
 # class Test(unittest.TestCase):
 #     def test_simple(self):
