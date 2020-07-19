@@ -137,7 +137,7 @@ def try_eval(expr: Expr, indent='') -> Expr:
                 if fun2.name == 'mul':
                     return Atom(as_num(eval(x, indent+'    ')) * as_num(eval(y, indent+'    ')))
                 if fun2.name == 'div':
-                    return Atom(as_num(eval(y, indent+'    ')) / as_num(eval(x, indent+'    ')))
+                    return Atom(as_num(eval(y, indent+'    ')) // as_num(eval(x, indent+'    ')))
                 if fun2.name == 'lt':
                     return t if as_num(eval(y, indent+'    ')) < as_num(eval(x, indent+'    ')) else f
                 if fun2.name == 'eq':
@@ -182,6 +182,10 @@ def parse_formula(tokens: List[str]) -> Expr:
             used_index, fun = dfs(index+1)
             used_index, arg = dfs(used_index+1)
             return used_index, Ap(fun, arg)
+        if tokens[index] == 'b':
+            return index, Ap(Ap(Atom('s'), Ap(t, Atom('s'))), t)
+        if tokens[index] == 'c':
+            return index, Ap(Ap(Atom('s'), Ap(Ap(Atom('s'), Ap(t, Ap(Ap(Atom('s'), Ap(t, Atom('s'))), t))), Atom('s'))), Ap(t, t))
         else:
             return index, Atom(tokens[index])
 
@@ -214,27 +218,27 @@ def main():
     click = Ap(Ap(cons, Atom(vector.x)), Atom(vector.y))
     expr: Expr = Ap(Ap(Atom('galaxy'), state), click)
 
-    while True:
-        # repl
-        print('> ', end='')
-        tokens = input().split()
-        try:
-            expr = parse_formula(tokens)
-            print(expr)
-            print(eval(expr))
-        except TypeError as e:
-            print(e)
-    # print('##### interact expr #####', expr, sep='\n')
-    res: Expr = eval(expr)
-    # print('##### interact res #####', res, sep='\n')
     # while True:
-    #     click: Expr = Ap(Ap(cons, Atom(vector.x)), Atom(vector.y))
-    #     #print(click)
-    #     (new_state, images) = interact(state, click)
-    #     exit()
-    #     #print_IMAGES(images)
-    #     vector = REQUEST_CLICK_FROM_USER()
-    #     state = new_state
+    #     # repl
+    #     print('> ', end='')
+    #     tokens = input().split()
+    #     try:
+    #         expr = parse_formula(tokens)
+    #         print(expr)
+    #         print(eval(expr))
+    #     except TypeError as e:
+    #         print(e)
+    print('##### interact expr #####', expr, sep='\n')
+    res: Expr = eval(expr)
+    print('##### interact res #####', res, sep='\n')
+    while True:
+        click: Expr = Ap(Ap(cons, Atom(vector.x)), Atom(vector.y))
+        # print(click)
+        (new_state, images) = interact(state, click)
+        exit()
+        # print_IMAGES(images)
+        vector = REQUEST_CLICK_FROM_USER()
+        state = new_state
 
 
 if __name__ == '__main__':
