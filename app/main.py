@@ -61,6 +61,10 @@ class Ship:
         self.x6 = x6
         self.x7 = x7
 
+    def __str__(self):
+        return ','.join([str(c) for c in (self.ship_id, self.position, self.velocity,
+                                          self.x4, self.x5, self.x6, self.x7)])
+
     def get_accelarate_vec(self):
         if abs(self.position[0]) > abs(self.position[1]):
             if self.position[0] > 0:
@@ -77,9 +81,14 @@ class Ship:
 def makeCommandsRequest(player_key, gameResponse):
     print('makeCommandsRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
-    my_ship = get_my_ship(gameResponse)
-    print('my_pos:', my_pos)
-    commands = [[ACCELERATE, my_ship.ship_id, my_ship.get_accelarate_vec()]]
+    commands = []
+    try:
+        my_ship = get_my_ship(gameResponse)
+        print('my_ship:', my_ship)
+        commands = [[ACCELERATE, my_ship.ship_id,
+                     my_ship.get_accelarate_vec()]]
+    except ValueError as e:
+        print(e)
 
     req = Modulate([[COMMANDS, int(player_key), commands]])
     return ''.join([str(c) for c in req()])
