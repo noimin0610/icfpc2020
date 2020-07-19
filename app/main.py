@@ -109,12 +109,11 @@ def get_my_ship(gameResponse) -> Ship:
                 if shipsAndCommands is None:
                     return None
                 for ship_and_command in shipsAndCommands:
-                    if len(ship_and_command) >= 2:
-                        ship, appliedCommands, *_ = ship_and_command
-                        if len(ship) >= 8:
-                            role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
-                            if role == player_role:
-                                return Ship(shipId, position, velocity, x4, x5, x6, x7)
+                    ship = ship_and_command[0]
+                    if len(ship) >= 8:
+                        role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
+                        if role == player_role:
+                            return Ship(shipId, position, velocity, x4, x5, x6, x7)
 
 
 def main():

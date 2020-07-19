@@ -263,31 +263,36 @@ class Demodulate(Node):
 
     def __call__(self):
         return self.demodulate(self.argv[0])
-    
+
     def demodulate(self, a):
         if a[:2] == [0, 0]:
             return None
         elif a[:2] == [0, 1] or a[:2] == [1, 0]:
             return self.demodulate_number(a)
+        ret = ' '.join(self._demodulate(a))
 
-        ret = []
-        self.i += 2 # 最初の [1, 1] を読み飛ばす
+        return execute(ret)
+
+    def _demodulate(self, a):
+        if a[:2] == [0, 0]:
+            return None
+        elif a[:2] == [0, 1] or a[:2] == [1, 0]:
+            return self.demodulate_number(a)
+
+        ret = ['ap ap cons']
+        self.i += 2  # 最初の [1, 1] を読み飛ばす
         while self.i < len(a):
             if a[self.i:self.i+2] == [1, 1]:
-                ret.append(self.demodulate(a))
+                # ret.append(self.demodulate(a))
+                ret.append('ap ap cons')
+                self.i += 2
             elif a[self.i:self.i+2] == [0, 1] or a[self.i:self.i+2] == [1, 0]:
-                ret.append(self.demodulate_number(a))
+                ret.extend([str(self.demodulate_number(a))])
             else:
-                ret.append(None)
-                self.i += 2
-
-            if a[self.i:self.i+2] == [0, 0]:
-                self.i += 2
-                break
-            elif a[self.i:self.i+2] == [1, 1]:
+                ret.append('nil')
                 self.i += 2
         return ret
-    
+
     def demodulate_number(self, a):
         if a == [0, 1, 0]:
             return 0
@@ -309,7 +314,6 @@ class Demodulate(Node):
 
     def demodulate_list(self, a):
         pass
-        
 
 
 class Modem(Node):
