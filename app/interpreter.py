@@ -30,6 +30,20 @@ import sys
 # }
 
 
+def list_to_cons_str(l: list) -> str:
+    ret = []
+    for x in l:
+        ret.append('ap ap cons')
+        if isinstance(x, Node):
+            ret.append(x.display())
+        elif isinstance(x, int):
+            ret.append(str(x))
+        elif isinstance(x, list):
+            ret.append(list_to_cons_str(x))
+    ret.append('nil')
+    return ' '.join(ret)
+
+
 class Node:
     def __init__(self, argv=None):
         self.argc = 1
@@ -56,6 +70,21 @@ class Node:
 
     def __eq__(self, other):
         return type(self) == type(other) and self.argv == other.argv
+
+    def display(self) -> str:
+        ret = []
+        for i in range(len(self.argv)):
+            ret.append('ap')
+        ret.append(self.__class__.__name__)
+        for x in self.argv:
+            if isinstance(x, Node):
+                ret.append(x.display())
+            elif isinstance(x, int):
+                ret.append(str(x))
+            elif isinstance(x, list):
+                ret.append(list_to_cons_str(x))
+
+        return ' '.join(ret)
 
 
 class Inc(Node):
@@ -504,7 +533,7 @@ class Cons(Node):
                 return Nil()
             return self.argv[:-1]
         if isinstance(self.argv[1], int) or isinstance(self.argv[1], Variable):
-           self.argv[1] = [self.argv[1]]
+            self.argv[1] = [self.argv[1]]
         return [self.argv[0]] + self.argv[1]
 
     def _add__(self, other):
@@ -614,6 +643,7 @@ class Vec(Node):
     def __call__(self):
         return Cons(self.argv)()
 
+
 class ParenOpen(Node):
     def __init__(self, argv=None):
         self.argc = 0
@@ -621,6 +651,7 @@ class ParenOpen(Node):
 
     def __call__(self):
         return self
+
 
 class ParenClose(Node):
     def __init__(self, argv=None):
@@ -630,6 +661,7 @@ class ParenClose(Node):
     def __call__(self):
         return self
 
+
 class Comma(Node):
     def __init__(self, argv=None):
         self.argc = 0
@@ -637,6 +669,7 @@ class Comma(Node):
 
     def __call__(self):
         return self
+
 
 class If0(Node):
     def __init__(self, argv=None):
@@ -705,7 +738,8 @@ class MultipleDraw(Node):
     def __call__(self):
         if len(self.argv) < self.argc:
             return self
-        if isinstance(self.argv[0], Nil): return []
+        if isinstance(self.argv[0], Nil):
+            return []
         return [Draw(dots) for dots in self.argv[0]]
 
 
@@ -734,7 +768,7 @@ class Program:
             self.i += 1
         op = self.nodes[self.i]
         self.i += 1
-        if isinstance(op, Draw): # ap draw ( ... ) に対応
+        if isinstance(op, Draw):  # ap draw ( ... ) に対応
             assert isinstance(self.nodes[self.i], ParenOpen)
             self.i += 1
             draw_args = []
@@ -841,10 +875,12 @@ def parse(tokens):
 def lex(s):
     return s.split()
 
-def execute(source:str)->list:
+
+def execute(source: str) -> list:
     tokens = lex(source)
     program = parse(tokens)
     return program.eval()
+
 
 def main():
     # example input: ap ap add -2 ap neg 7
