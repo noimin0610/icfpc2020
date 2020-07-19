@@ -92,14 +92,14 @@ def makeCommandsRequest(player_key, gameResponse):
     print('makeCommandsRequest')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
     commands = []
-    try:
-        my_ship = get_my_ship(gameResponse)
-        print('my_ship:', my_ship)
-        if my_ship is not None:
-            commands = [[ACCELERATE, my_ship.ship_id,
-                         my_ship.get_accelarate_vec()]]
-    except ValueError as e:
-        print(e)
+    # try:
+    #     my_ship = get_my_ship(gameResponse)
+    #     print('my_ship:', my_ship)
+    #     if my_ship is not None:
+    #         commands = [[ACCELERATE, my_ship.ship_id,
+    #                      my_ship.get_accelarate_vec()]]
+    # except ValueError as e:
+    #     print(e)
     data = [COMMANDS, int(player_key), commands]
     print('data:', data)
     req = Modulate([data])()
