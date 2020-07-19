@@ -608,17 +608,6 @@ class Vec(Node):
     def __call__(self):
         return Cons(self.argv)()
 
-class Draw(Node):
-    def __init__(self, argv=None):
-        self.argc = 1
-        if argv:
-            self.argv = argv[:]
-        else:
-            self.argv = []
-
-    def __call__(self):
-        return self.argv #TODO pictureの持ち方をどうするか？要検討
-
 class ParenOpen(Node):
     def __init__(self, argv=None):
         self.argc = 0
@@ -667,6 +656,9 @@ class Picture:
     def add_dot(self, x, y):
         self.dots.add((x, y))
 
+    def __call__(self):
+        return self.dots
+
 
 class Draw(Node):
     """
@@ -686,6 +678,7 @@ class Draw(Node):
             return self
         pic = Picture()
         for dot in self.argv[0]:
+            dot = dot()
             pic.add_dot(dot[0], dot[1])
         return pic
 
@@ -797,14 +790,6 @@ def parse(tokens):
             nodes.append(Variable())
         elif t == 'send':
             nodes.append(None)
-        elif t == '(':
-            nodes.append(Demodulate())
-        elif t == ')':
-            nodes.append(Demodulate())
-        elif t == 'draw':
-            nodes.append(Draw())
-        elif t == 'vec':
-            nodes.append(Vec())
         # elif t == 'checkerboard':
         #     nodes.append(None)
         # elif t == 'multipledraw':
