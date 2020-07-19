@@ -92,14 +92,16 @@ def makeCommandsRequest(player_key, gameResponse):
     print('======== makeCommandsRequest ========')
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
     commands = []
-    # try:
-    #     my_ship = get_my_ship(gameResponse)
-    #     print('my_ship:', my_ship)
-    #     if my_ship is not None:
-    #         commands = [[ACCELERATE, my_ship.ship_id,
-    #                      my_ship.get_accelarate_vec()]]
-    # except ValueError as e:
-    #     print(e)
+    try:
+        my_ship = get_my_ship(gameResponse)
+        print('my_ship:', my_ship)
+        if my_ship is not None:
+            accelerate_command = [
+                ACCELERATE, my_ship.ship_id, my_ship.get_accelarate_vec()]
+            commands.append(accelerate_command)
+
+    except ValueError as e:
+        print(e)
     data = [COMMANDS, int(player_key), commands]
     print('\tdata:', data)
     req = Modulate([data])()
@@ -111,21 +113,33 @@ def makeCommandsRequest(player_key, gameResponse):
 
 
 def get_my_ship(gameResponse) -> Ship:
+    print("#### get_my_ship")
     # [flag, gameStage, [x0, player_role, x2, x3, x4], [gameTick, x1, shipsAndCommands]]
-    if gameResponse is not None and len(gameResponse) >= 4:
-        flag, gameStage, staticGameInfo, gameState, *_ = gameResponse
-        if staticGameInfo is not None and len(staticGameInfo) >= 5:
-            x0, player_role, x2, x3, x4, *_ = staticGameInfo
-            if gameState is not None and len(gameState) >= 3:
-                gameTick, x1, shipsAndCommands, *_ = gameState
-                if shipsAndCommands is None:
-                    return None
-                for ship_and_command in shipsAndCommands:
-                    ship = ship_and_command[0]
-                    if len(ship) >= 8:
-                        role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
-                        if role == player_role:
-                            return Ship(shipId, position, velocity, x4, x5, x6, x7)
+    if gameResponse is not None and len(gameResponse) < 4:
+        print('\tgameResponse:', gameResponse)
+        return None
+    flag, gameStage, staticGameInfo, gameState, *_ = gameResponse
+
+    if staticGameInfo is not None and len(staticGameInfo) < 5:
+        print('\tstaticGameInfo:', staticGameInfo)
+        return None
+    x0, player_role, x2, x3, x4, *_ = staticGameInfo
+
+    if gameState is not None and len(gameState) < 3:
+        print('\tgameState:', gameState)
+        return None
+    gameTick, x1, shipsAndCommands, *_ = gameState
+
+    print('\tshipsAndCommands:', shipsAndCommands)
+    if shipsAndCommands is None:
+        print('\tshipsAndCommands:', shipsAndCommands)
+        return None
+    for ship_and_command in shipsAndCommands:
+        ship = ship_and_command[0]
+        if len(ship) >= 8:
+            role, shipId, position, velocity, x4, x5, x6, x7, *_ = ship
+            if role == player_role:
+                return Ship(shipId, position, velocity, x4, x5, x6, x7)
 
 
 def main():
