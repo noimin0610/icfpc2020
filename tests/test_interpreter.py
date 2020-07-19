@@ -358,13 +358,13 @@ class TestVariable(unittest.TestCase):
 class TestVec(unittest.TestCase):
     def test_simple(self):
         vec = Vec()
-        self.assertEqual(vec(), Cons())
+        self.assertEqual(vec(), Cons()())
         argv = [1, 2]
         vec = Vec(argv)
-        self.assertEqual(vec(), Cons(argv))
+        self.assertEqual(vec(), Cons(argv)())
         argv = [1, Nil()]
         vec = Vec(argv)
-        self.assertEqual(vec(), Cons(argv))
+        self.assertEqual(vec(), Cons(argv)())
 
 
 class TestEval(unittest.TestCase):
@@ -388,7 +388,7 @@ class TestEval(unittest.TestCase):
         program = Program([Ap(), Ap(), Eq(), -5, Ap(), Ap(),
                            Mul(), Ap(), Inc(), 4, Ap(), Dec(), 0])
         self.assertEqual(program.eval(), True, str(program))
-        
+
         program = Program([Ap(), Ap(), Add(), -2, Ap(), Neg(), Variable()])
         self.assertEqual(program.eval(), Variable(), program)
 
@@ -425,7 +425,7 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), TrueCombinator(), [1], Ap(), Inc(), Variable()])
         self.assertEqual(program.eval(), [1], str(program))
-        
+
         program = Program(
             [Ap(), Ap(), TrueCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), Variable(), str(program))
@@ -438,11 +438,11 @@ class TestEval(unittest.TestCase):
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Add(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
-        
+
         program = Program(
             [Ap(), Ap(), FalseCombinator(), [1], Ap(), Inc(), Variable()])
         self.assertEqual(program.eval(), Variable(), str(program))
-        
+
         program = Program(
             [Ap(), Ap(), FalseCombinator(), Variable(), Ap(), Inc(), 1])
         self.assertEqual(program.eval(), 2, str(program))
