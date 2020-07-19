@@ -71,8 +71,12 @@ def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
     # Note: res will be modulatable here(consists of cons, nil and numbers only)
     flag, new_state, data = GET_LIST_ITEMS_FROM_EXPR(res)
     if as_num(flag) == 0:
-        return (new_state, data)
+        return (new_state, multipledraw(data))
     return interact(new_state, SEND_TO_ALIEN_PROXY(data))
+
+
+def multipledraw(data: Expr) -> Expr: # List[List[Vect]]
+    return data #TODO stub
 
 
 def eval(expr: Expr, indent='') -> Expr:
