@@ -1,17 +1,41 @@
 import requests
 import sys
+from interpreter import *
+
+CREATE = 1
+JOIN = 2
+START = 3
+COMMANDS = 4
+
+# commands
+ACCELERATE = 0
+DETONATE = 1
+SHOOT = 2
+
+
+def send(a, b):
+    print(a, b)
 
 
 def makeJoinRequest(player_key: str) -> str:
-    return ''
+    req = Modulate([[JOIN, int(player_key), []]])
+    return [str(c) for c in req()]
 
 
 def makeStartRequest(player_key, gameResponse):
-    return ''
+    # https://message-from-space.readthedocs.io/en/latest/game.html#start
+    xs = [1, 2, 3, 4]  # initial ship parameters
+    assert xs[3] != 0
+
+    req = Modulate([[START, int(player_key), xs]])
+    return [str(c) for c in req()]
 
 
 def makeCommandsRequest(player_key, gameResponse):
-    return ''
+    # https://message-from-space.readthedocs.io/en/latest/game.html#commands
+    commands = []
+    req = Modulate([[COMMANDS, int(player_key), commands]])
+    return [str(c) for c in req()]
 
 
 def main():
