@@ -32,7 +32,7 @@ def send(base_url, data):
 
 def makeJoinRequest(player_key: str) -> str:
     req = Modulate([[JOIN, int(player_key), []]])
-    return [str(c) for c in req()]
+    return ''.join([str(c) for c in req()])
 
 
 def makeStartRequest(player_key, gameResponse):
@@ -41,14 +41,14 @@ def makeStartRequest(player_key, gameResponse):
     assert xs[3] != 0
 
     req = Modulate([[START, int(player_key), xs]])
-    return [str(c) for c in req()]
+    return ''.join([str(c) for c in req()])
 
 
 def makeCommandsRequest(player_key, gameResponse):
     # https://message-from-space.readthedocs.io/en/latest/game.html#commands
     commands = []
     req = Modulate([[COMMANDS, int(player_key), commands]])
-    return [str(c) for c in req()]
+    return ''.join([str(c) for c in req()])
 
 
 def main():
