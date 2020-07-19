@@ -301,7 +301,6 @@ class Modem(Node):
 #         if isinstance(self.argv[0], Variable):
 #             return Variable()
 
-
 class Neg(Node):
     def __init__(self, argv=None):
         self.argc = 1
@@ -607,6 +606,7 @@ class Vec(Node):
 
     def __call__(self):
         return Cons(self.argv)()
+<<<<<<< HEAD
 
 class ParenOpen(Node):
     def __init__(self, argv=None):
@@ -681,7 +681,43 @@ class Draw(Node):
             dot = dot()
             pic.add_dot(dot[0], dot[1])
         return pic
+=======
+>>>>>>> 8e6f7da05f529048ccc24148e43848349aae4aaa
 
+class Draw(Node):
+    def __init__(self, argv=None):
+        self.argc = 1
+        if argv:
+            self.argv = argv[:]
+        else:
+            self.argv = []
+
+    def __call__(self):
+        return self.argv #TODO pictureの持ち方をどうするか？要検討
+
+class ParenOpen(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+class ParenClose(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
+
+class Comma(Node):
+    def __init__(self, argv=None):
+        self.argc = 0
+        self.argv = []
+
+    def __call__(self):
+        return self
 
 class Program:
     def __init__(self, nodes):
