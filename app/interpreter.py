@@ -220,6 +220,8 @@ class Modulate(Node):
             return [0, 0]
         if isinstance(v, Nil):
             return Modulate.modulate_nil(v)
+        elif isinstance(v, tuple):
+            return Modulate.modulate_tuple(v)
         elif isinstance(v, list):
             return Modulate.modulate_list(v)
         elif isinstance(v, int):
@@ -236,6 +238,14 @@ class Modulate(Node):
         bitlen = 0 - -l//4*4
         ret += [1]*(bitlen//4) + [0]
         ret += [0]*(bitlen - l) + [int(c) for c in binary]
+        return ret
+
+    def modulate_tuple(v):
+        if not v:
+            return [0, 0]
+        ret = [1, 1]
+        for e in v:
+            ret.extend(Modulate.modulate(e))
         return ret
 
     def modulate_list(v):

@@ -159,6 +159,26 @@ class TestModulate(unittest.TestCase):
             0, 0
         ], str(mod))
 
+    def test_modulate_tuple(self):
+        mod = Modulate([(1, 2)])
+        self.assertEqual(mod(), [
+            1, 1, 
+            0, 1, 1, 0, 0, 0, 0, 1, 
+            0, 1, 1, 0, 0, 0, 1, 0, 
+        ], str(mod))
+        mod = Modulate([[1, 2, (3, 4)]])
+        self.assertEqual(mod(), [
+            1, 1, 
+            0, 1, 1, 0, 0, 0, 0, 1, 
+            1, 1, 
+            0, 1, 1, 0, 0, 0, 1, 0,
+            1, 1, 
+            1, 1, 
+            0, 1, 1, 0, 0, 0, 1, 1,
+            0, 1, 1, 0, 0, 1, 0, 0,
+            0, 0
+        ], str(mod))
+
     def test_modulate_nested_list(self):
         mod = Modulate([[1, [2, 3], 4]])
         self.assertEqual(mod(), [
