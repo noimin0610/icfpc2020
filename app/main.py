@@ -38,14 +38,14 @@ class Ship:
     def get_accelarate_vec(self):
         if abs(self.position[0]) > abs(self.position[1]):
             if self.position[0] > 0:
-                return [-1, 0]
+                return (-1, 0)
             else:
-                return [1, 0]
+                return (1, 0)
         else:
             if self.position[1] > 0:
-                return [0, -1]
+                return (0, -1)
             else:
-                return [0, 1]
+                return (0, 1)
 
 
 def send(base_url, data) -> list:
