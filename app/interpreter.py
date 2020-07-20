@@ -293,6 +293,7 @@ class Demodulate(Node):
         ret = ['ap ap cons']
         self.i += 2  # 最初の [1, 1] を読み飛ばす
         while self.i < len(a):
+            print(self.i, a[self.i:])
             if a[self.i:self.i+2] == [1, 1]:
                 # ret.append(self.demodulate(a))
                 ret.append('ap ap cons')
