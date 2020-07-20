@@ -253,7 +253,8 @@ class Modulate(Node):
             return [0, 0]
         ret = []
         for e in v:
-            ret.extend([1, 1])
+            if not (isinstance(e, tuple) and ret != []):
+                ret.extend([1, 1])
             ret.extend(Modulate.modulate(e))
         ret.extend([0, 0])
         return ret
