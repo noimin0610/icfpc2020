@@ -2,7 +2,6 @@ import interpreter
 import sys
 import requests
 from typing import Optional, Dict, Tuple, List
-from interpreter import Modulate, execute
 
 sys.setrecursionlimit(200000)
 server_url = sys.argv[1]
@@ -99,9 +98,7 @@ def get_list_items_from_expr(res) -> Tuple[int, Expr, Expr]:
 def interact(state: Expr,  event: Expr) -> Tuple[Expr, Expr]:
     # See https://message-from-space.readthedocs.io/en/latest/message38.html
     expr: Expr = Ap(Ap(Atom('galaxy'), state), event)
-    # print('##### interact expr #####', expr, sep='\n')
     res: Expr = eval(expr)
-    # print('##### interact res #####', res, sep='\n')
 
     # Note: res will be modulatable here(consists of cons, nil and numbers only)
     flag, new_state, data = get_list_items_from_expr(res)
@@ -155,33 +152,25 @@ def multipledraw(data: List) -> Expr:
 
 
 def eval(expr: Expr) -> Expr:
-    #print(indent+'===== eval expr =====', indent + str(expr), sep='\n')
     if expr.evaluated is not None:
-        #print(indent+'-> evaluated', expr)
         return expr.evaluated
     initial: Expr = expr
     while True:
         result: Expr = try_eval(expr)
-        #print(indent+'-> result', result)
         if result == expr:
             initial.evaluated = result
-            #print(indent+'-> tried', expr)
             return result
         expr = result
 
 
 def try_eval(expr: Expr) -> Expr:
-    #print(indent+'===== try_eval expr =====', indent + str(expr), sep='\n')
     if expr.evaluated is not None:
-        #print(indent+'-> evaluated', expr)
         return expr.evaluated
     if isinstance(expr, Atom) and FUNCTIONS.get(expr.name) is not None:
         return FUNCTIONS.get(expr.name)
     if isinstance(expr, Ap):
-        #print(indent+'expr is Ap')
         fun: Expr = eval(expr.fun)
         expr.fun = fun
-        #print(indent + 'fun:' + str(fun))
         x: Expr = expr.arg
         if isinstance(fun, Atom):
             if fun.name == 'neg':
@@ -203,10 +192,8 @@ def try_eval(expr: Expr) -> Expr:
             if fun.name == 'modem':
                 return Ap(x, f)
         if isinstance(fun, Ap):
-            #print(indent+'>>>>> fun is Ap')
             fun2: Expr = eval(fun.fun)
             expr.fun.fun = fun2
-            #print(indent + 'fun2:' + str(fun2))
             y: Expr = fun.arg
             if isinstance(fun2, Atom):
                 if fun2.name == 't':
@@ -238,7 +225,6 @@ def try_eval(expr: Expr) -> Expr:
                         return Ap(z, Ap(y, x))
                     if fun3.name == 'cons':
                         return Ap(Ap(x, z), y)
-    #print(indent+'-> unupdated', expr)
     return expr
 
 
@@ -279,9 +265,7 @@ def parse_functions(lines: List[str]) -> Dict[str, Expr]:
     for line in lines:
         tokens = line.split()
         function_name = tokens[0]
-        # print(tokens)
         expr = parse_formula(tokens[2:])
-        # print(expr)
         functions[function_name] = expr
     return functions
 

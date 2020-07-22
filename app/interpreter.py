@@ -4,31 +4,6 @@
 
 import sys
 
-# DEFINED_NODE_GENERATORS = {
-#     'statelessdraw': lambda: CCombinator([
-#         BCombinator([
-#             BCombinator(),
-#             BCombinator([
-#                 BCombinator([Cons([0])]),
-#                 CCombinator([
-#                     BCombinator([
-#                         BCombinator(),
-#                         Cons(),
-#                     ]),
-#                     CCombinator([Cons(), Nil()])
-#                 ])
-#             ])
-#         ]),
-#         CCombinator([
-#             BCombinator([
-#                 Cons(),
-#                 CCombinator([Cons(), Nil()])
-#             ]),
-#             Nil()
-#         ])
-#     ])
-# }
-
 
 def list_to_cons_str(l: list) -> str:
     ret = []
@@ -344,52 +319,6 @@ class Modem(Node):
             return Variable()
         return Demodulate([Modulate.modulate(self.argv[0])])()
 
-
-# class F38(Node):
-#     def __init__(self, argv=None):
-#         self.argc = 2 # protorol, protorol(state, vector)
-#         if argv:
-#             self.argv = argv[:]
-#         else:
-#             self.argv = []
-#
-#     def __call__(self):
-#         if len(self.argv) < self.argc:
-#             return self
-#         if isinstance(self.argv[0], Variable):
-#             return Variable()
-#         flag, newstate, data = argv[1]
-#         if flag == 0:
-#             return [Modem(newstate), Multipledraw(data)]
-#         else:
-#             return Interact(Modem(newstate), Send(data))
-#
-# class Interact(Node):
-#     def __init__(self, argv=None):
-#         self.argc = 2 # state, event
-#         if argv:
-#             self.argv = argv[:]
-#         else:
-#             self.argv = []
-#
-#     def __call__(self):
-#         if len(self.argv) < self.argc:
-#             return self
-#         if isinstance(self.argv[0], Variable):
-#             return Variable()
-#         return F38('galaxy', 'protocol(state, vector)')
-
-
-# class Send(Node):
-#     def __init__(self, argv=None):
-#         self.argc = 1
-#         if argv:
-#             self.argv = argv[:]
-#         else:
-#             self.argv = []
-#
-#     def __call__(self):
-#         return self #TODO ?????
 
 class Neg(Node):
     def __init__(self, argv=None):
