@@ -80,7 +80,7 @@ def SEND_TO_ALIEN_PROXY(data):
         print('HTTP code:', res.status_code)
         print('Response body:', res.text)
         exit(1)
-    
+
     print('Server response:', res.text)
     return res.text
 
